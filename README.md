@@ -1,6 +1,7 @@
-# ESX 2
+# ESX 2 | WIP 
 
-### Sill looking for old version ? => https://github.com/ESX-Org/es_extended/tree/v1-final
+### THIS IS WIP, DO NOT USE UNLESS YOU ARE AN EXPERIENCED DEVELOPER
+###  Need the correct Version? => https://github.com/ESX-Org/es_extended/tree/v1-final
 
 # Table of Contents
 
@@ -97,22 +98,12 @@ Another thing is the performance, so far, it's more optimized to work this way.
 ## Changelog <a name="changelog"></a>
 
 ```
-- Switched to a module-based single resource for ease of use and performance
-- Performance improvements
-- Split all base functionnalities into their own module
-- Module can either encapsulate its own functionality or declare global stuff
-- Loading modules via method M('themodule') ensure correct loading order of modules
-- Automated database schema generation (RIP SQL files everywhere)
-- Database schema can also be expanded by other modules
-- Custom event system to avoid serialization of event data and cross-resource communication, that make it possible to pass metatables through these events (You can still use TriggerEvent and such to escape that thing)
-- xPlayer fully customizable without rewriting core resources (Hello second job, faction system and such...)
-- Added some modules to optimize common things like input, marker and static npc management
-- Extend base lua functionnality when appropriate via module. example: table.indexOf
-- OOP System based on http://lua-users.org/wiki/InheritanceTutorial and improved
-- Neat menu API
-- Open as many pages as you want in single NUI frame with Frame API
-- EventEmitter class
-- WIP rewrite of well-known datastore / inventory / account stuff
+- Added Experimental Inventory
+- Added Items
+- Added Use of (and the registering of usable) Items
+- Added Scoreboard UI
+- Added very basic Instance 
+- Added Experimental Property System
 ```
 
 ## Module Examples <a name="examples"></a>
