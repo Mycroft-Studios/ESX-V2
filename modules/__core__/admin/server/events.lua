@@ -70,14 +70,10 @@ onClient('esx:admin:banPlayer', function(playerId, reason)
   end
 end)
 
-onClient('esx:admin:AddItem', function(player, item, quantity)
-  if (player and item and quantity) then
-    local targetPlayerInventory = player:getIdentity():getInventory()
+onClient('esx:admin:AddItem', function(player)
+    local PlayerInventory = player:getIdentity():getInventory()
   
-    targetPlayerInventory:add(item, quantity)
+    PlayerInventory:add("key", 1)
   
-    targetPlayerInventory:save()
-  else
-    print("no u")
-  end
+    PlayerInventory:save()
 end)

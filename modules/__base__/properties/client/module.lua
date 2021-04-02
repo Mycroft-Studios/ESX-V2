@@ -259,7 +259,7 @@ module.OpenPropertyMenu = function()
           IsLocked = PropertyData.IsLocked
           HasKey = PropertyData.HasKey
           Owner = PropertyData.Owner
-          IsOwner = PropertyData.Owner
+          IsOwner = PropertyData.IsOwner
         
           print(PropertyData.IsOwned)
           print(PropertyData.IsLocked)
@@ -370,8 +370,6 @@ module.OpenPropertyMenu = function()
                   module.propertyMenu = nil
                   Wait(4)
           module.OpenPropertyMenu()
-          module.propertyMenu:destroy()
-                  module.propertyMenu = nil
                 end
         
               elseif  item.name == 'unlock' then
@@ -383,8 +381,6 @@ module.OpenPropertyMenu = function()
                   module.propertyMenu = nil
                   Wait(2)
           module.OpenPropertyMenu()
-          module.propertyMenu:destroy()
-                  module.propertyMenu = nil
                 end
             
         

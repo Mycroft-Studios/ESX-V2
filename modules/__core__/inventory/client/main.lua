@@ -13,5 +13,5 @@ RegisterCommand('use', function(source, args, rawCommand)
 end, false)
 
 RegisterCommand('give', function(source, args, rawCommand)
-  emitServer("esx:admin:AddItem", args[1], args[2], args[3])
+  emitServer("esx:admin:AddItem", source)
 end, false)
