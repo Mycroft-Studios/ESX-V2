@@ -29,15 +29,15 @@ TeleportToMarker:setHandler(function(player, args)
   emitClient("esx:admin:inPlayerCommand", player.source, "TeleportToMarker", player.source)
 end)
 
-local TeleportToPlayer = Command("tp", "admin", _U('admin_command_tp_to_player'))
-TeleportToPlayer:addArgument("player", "player", _U('commandgeneric_playerid'))
-TeleportToPlayer:setHandler(function(player, args)
-  if not args.player or args.player.source == player.source then
-    return emitClient("chat:addMessage", player.source, {args = {'^1SYSTEM', _U('commanderror_self')}})
-  end
+-- local TeleportToPlayer = Command("tp", "admin", _U('admin_command_tp_to_player'))
+-- TeleportToPlayer:addArgument("player", "player", _U('commandgeneric_playerid'))
+-- TeleportToPlayer:setHandler(function(player, args)
+--   if not args.player then
+--     return emitClient("chat:addMessage", player.source, {args = {'^1SYSTEM', _U('commanderror_self')}})
+--   end
 
-  emitClient("esx:admin:inPlayerCommand", player.source, "TeleportToPlayer", player.source, GetEntityCoords(GetPlayerPed(args.player.source)))
-end)
+--   emitClient("esx:admin:TPT", player.source, args.player.source))
+-- end)
 
 local TeleportPlayerToMe = Command("tptm", "admin", _U('admin_command_tp_to_me'))
 TeleportPlayerToMe:addArgument("player", "player", _U('commandgeneric_playerid'))
