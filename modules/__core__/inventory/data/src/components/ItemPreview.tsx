@@ -4,24 +4,18 @@ import styled from "styled-components";
 import { Item } from "../Containers/App/App";
 
 const StyledItem = styled.div`
-  height: 128px;
-  width: 128px;
-  margin: 10px;
+height: 128px;
+width: 128px;
+margin: 10px;
 
-  position: relative;
+position: relative;
 
-  background-color: rgba(60, 60, 60, 0.9);
+background-color: rgba(30, 30, 30, 1);
+border: 1px solid rgba(255, 255, 255, 0.1);
+&:hover {
+  cursor: move;
+}
 
-  &:hover {
-    cursor: move;
-  }
-`;
-
-const Quantity = styled.span`
-  position: absolute;
-  top: -2px;
-  right: 2px;
-  color: white;
 `;
 
 export const ItemPreview: FunctionComponent<{ items: Item[] }> = ({
@@ -47,14 +41,15 @@ export const ItemPreview: FunctionComponent<{ items: Item[] }> = ({
   if (!display) {
     return null;
   }
+
   return (
     <StyledItem
       style={{
         backgroundImage: `url('${imageUrl}')`,
         ...style,
       }}
+
     >
-      <Quantity>{quantity}</Quantity>
     </StyledItem>
   );
 };

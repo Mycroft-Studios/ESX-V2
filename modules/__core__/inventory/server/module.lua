@@ -134,3 +134,4 @@ Inventory.all = setmetatable({}, {
 Inventory.fromOwner = function(owner)
   return Identity.all[owner]
 end
+

@@ -26,5 +26,18 @@ export const playerInventoryMock = {
       name: "handcuff",
       quantity: 1,
     },
+    {
+      name: "phone",
+      quantity: 1,
+    },
+    {
+      name: "bread",
+      quantity: 1,
+    },
+    {
+      name: "weed",
+      quantity: 1,
+    },
+    
   ],
 };

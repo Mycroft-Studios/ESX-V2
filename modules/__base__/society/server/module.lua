@@ -44,7 +44,7 @@ module.isPlayerBoss = function(playerId, job)
 end
 
 module.WashMoneyCRON = function(d, h, m)
-	MySQL.Async.fetchAll('SELECT * FROM society_moneywash', {}, function(result)
+	My.Async.fetchAll('SELECT * FROM society_moneywash', {}, function(result)
 		for i=1, #result, 1 do
 			local society = module.GetSociety(result[i].society)
 			local xPlayer = xPlayer.fromIdentifier(result[i].identifier)

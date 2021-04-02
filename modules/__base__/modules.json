@@ -4,7 +4,10 @@
     "garages",
     "rpchat",
     "sit",
+    "properties",
     "society",
     "vehicleshop",
-    "voice"
+    "voice",
+    "instance",
+    "scoreboard"
 ]

@@ -4,14 +4,14 @@ import { useDrop } from "react-dnd";
 import styled from "styled-components";
 
 const StyledPlayerTarget = styled.div`
-  width: 80%;
+  width: 20%;
   padding-top: 4px;
   padding-bottom: 4px;
   line-height: 32px;
   font-size: 32px;
   border: solid 1px grey;
-  border-radius: 4px;
-  color: orange;
+  border-radius: 20px;
+  color: red;
   text-align: center;
   margin: auto;
   margin-top: 8px;

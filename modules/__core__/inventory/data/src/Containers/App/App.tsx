@@ -5,6 +5,8 @@ import styled from "styled-components";
 import { Item } from "../../components/Item";
 import update from "immutability-helper";
 import { PlayerTarget } from "../../components/PlayerTarget";
+import { Use } from "../../components/useitem";
+import { Drop } from "../../components/dropitem";
 import { RangeSelectorModal } from "../../components/RangeSelectorModal";
 import { playerInventoryMock } from "../../mocks/player-inventory-mock";
 import { nearPlayersMock } from "../../mocks/near-players.mock";
@@ -21,23 +23,21 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  height: 5vh;
+  height: 7vh;
   color: white;
-  display: flex;
-  justify-content: center;
-  border-bottom: solid 1px rgba(60, 60, 60, 0.9);
-  padding-top: 4px;
-  padding-bottom: 4px;
+  white-space: pre-wrap;
+  border-bottom: 4px solid rgba(65, 65, 65, 0.7);
+  font-size: 23px;
+  padding-bottom: 7px;
+  padding-left: 2px;
 `;
 
-const InventoryInformations = styled.div`
-  height: 8vh;
-  border-bottom: solid 1px rgba(60, 60, 60, 0.9);
-  padding-top: 4px;
-  padding-bottom: 4px;
+const Info = styled.div`
   color: white;
-  display: flex;
-  justify-content: center;
+  text-align: right;
+  position: absolute;
+  right: 2%;
+  top: 1%;
 `;
 
 const ItemsContainer = styled.div`
@@ -50,7 +50,7 @@ const ItemsContainer = styled.div`
 
   /* Track */
   ::-webkit-scrollbar-track {
-    background: rgba(60, 60, 60, 0.9) !important;
+    background: rgba(0, 128, 255, 0.2) !important;
   }
 
   /* Handle */
@@ -66,78 +66,58 @@ const ItemsContainer = styled.div`
 
 const InventoryContainerAlone = styled.div`
   background-color: rgba(0, 0, 0, 0.9);
+  position: absolute;
   overflow-y: hidden;
   height: 97vh;
-  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   flex-grow: 3;
   margin: 5px;
+  width: 47%;
+  left: 1%;
   flex-basis: 0;
 `;
 
 const InventoryContainer = styled.div`
-  background-color: rgba(0, 0, 0, 0.9);
-  overflow-y: hidden;
-  border-radius: 6px;
-  height: 97vh;
-  flex-grow: 2;
-  margin: 5px;
-  flex-basis: 0;
+background-color: rgba(0, 0, 0, 0.9);
+position: absolute;
+overflow-y: hidden;
+height: 97vh;
+border-radius: 12px;
+border: 1px solid rgba(255, 255, 255, 0.1);
+flex-grow: 3;
+margin: 5px;
+width: 47%;
+right: 1%;
+flex-basis: 0;
 `;
 
-const InterractionContainer = styled.div`
-  background-color: rgba(0, 0, 0, 0.9);
-  max-height: 60vh;
-  flex-grow: 1;
-  align-self: safe center;
-  border-radius: 6px;
-
-  padding-top: 8px;
-  padding-bottom: 8px;
-
-  margin-left: 2vw;
-  margin-right: 2vw;
-
-  display: flex;
-  flex-direction: column;
-  align-items: safe center;
-  justify-content: safe space-evenly;
-
-  overflow-y: scroll;
-
-  /* Track */
-  ::-webkit-scrollbar-track {
-    background: rgba(60, 60, 60, 0.9) !important;
-  }
-
-  /* Handle */
-  ::-webkit-scrollbar-thumb {
-    background: orange;
-  }
-
-  /* Handle on hover */
-  ::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-`;
-
-export type Item = { name: string; quantity: number };
-
+export type Item = { name: string; quantity: number};
+export type Name = { name: string};
+export type ID = { id: string};
+export type Capacity = { lengh: number };
 export type Player = { distance: number; playerId: string };
+
 
 const App = () => {
   const [modalMetadata, setModalMetadata] = useState<{
     targetPlayer?: { distance: number; playerId: string };
     itemCount?: number;
-    item?: { name: string; quantity: number };
+    item?: { name: string; quantity: number};
     isOpen: boolean;
   }>({ isOpen: false });
 
   const isBrowser = useIsBrowser();
 
   const [items, setItems] = useState<Item[]>([]);
+  const [itemsother, setOtherItems] = useState<Item[]>([]);
   const [baseItems, setBaseItems] = useState<Item[]>([]);
   const [nearPlayers, setNearPlayers] = useState<Player[]>([]);
-
+  const [PlayerName, setPlayerName] = useState<Name[]>([]);
+  const [ContainerID, setContainerID] = useState<ID[]>([]);
+  const [showOtherInv, setShowOtherInv] = React.useState(false);
+  const numRows = items.length;
+  const numRows2 = itemsother.length;
   const [closeQuery] = useNuiQuery("close");
   const [reorderQuery] = useNuiQuery("reorder");
   const [giveQuery] = useNuiQuery("give");
@@ -148,8 +128,24 @@ const App = () => {
   }, "updateSelfInventory");
 
   useNuiEvent(({ data }) => {
+    if (showOtherInv) {
+      setOtherItems(playerInventoryMock.items);
+    } else {
+      setOtherItems(data.content);
+    }
+  }, "updateOtherInventory");
+
+  useNuiEvent(({ data }) => {
     setNearPlayers(data);
   }, "updateNearPlayers");
+
+  useNuiEvent(({ data }) => {
+    setPlayerName(data);
+  }, "SetPlayerData");
+
+  useNuiEvent(({ data }) => {
+    setShowOtherInv(data);
+  }, "SetShowOtherInv");
 
   // Set default mock values if we're on browser
   useEffect(() => {
@@ -163,7 +159,7 @@ const App = () => {
   // Close on escape
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" || "I") {
         // Check is items position has changed
         const hasPositionChanged = hasItemsPositionChanged(baseItems, items);
 
@@ -196,6 +192,21 @@ const App = () => {
     [items]
   );
 
+  const moveOtherItem = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragItem = itemsother[dragIndex];
+      setOtherItems(
+        update(itemsother, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, dragItem],
+          ],
+        })
+      );
+    },
+    [itemsother]
+  );
+  
   const onItemDropOnPlayerTarget = useCallback(
     (dragItem: any, player: { distance: number; playerId: string }) => {
       const item = items[dragItem.index];
@@ -212,17 +223,23 @@ const App = () => {
 
   return (
     <Container>
-      <InventoryContainerAlone>
-        <Header>
-          <h1> John Doe's bag </h1>
+      <InventoryContainerAlone style={{width: showOtherInv ? '47%' : '63%' , left: showOtherInv ? '1%' : '15%'}}>
+        <Header>  
+        <div> 
+          {PlayerName} | Inventory 
+          {'\n'}
+          {'\n'}
+         (<text style={{color: '#009ACD'}}> 027278302 </text>)
+          </div>
+        <Info>
+        <div> 
+        Capacity:<text style={{color: '#009ACD'}}> {numRows} / 64 </text>
+        {'\n'}
+        {'\n'}
+         Weight:<text style={{color: '#009ACD'}}> {numRows} / 100 </text>
+        </div>
+          </Info>
         </Header>
-        <InventoryInformations>
-          {/* @TODO: Personal information here */}
-          {/* <span>10/100</span>
-          <div>
-            <span>1502$</span>
-          </div> */}
-        </InventoryInformations>
         <ItemsContainer>
           <DndProvider
             backend={TouchBackend}
@@ -240,23 +257,42 @@ const App = () => {
           </DndProvider>
         </ItemsContainer>
       </InventoryContainerAlone>
-      {/* Set visibility to hidden when there is no near player */}
-      <InterractionContainer
-        style={{ visibility: nearPlayers.length > 0 ? "visible" : "hidden" }}
-      >
-        <DndProvider backend={TouchBackend} options={{}}>
-          {nearPlayers.map((nearPlayer) => (
-            <PlayerTarget
-              key={nearPlayer.playerId}
-              onDrop={(item: any) => onItemDropOnPlayerTarget(item, nearPlayer)}
-            >
-              {nearPlayer.playerId} ({nearPlayer.distance} meters)
-            </PlayerTarget>
-          ))}
-        </DndProvider>
-      </InterractionContainer>
       {/* @TODO: manage source inventory (->/<-) target inventory drag/drop */}
-      {/* <InventoryContainer></InventoryContainer> */}
+       <InventoryContainer style={{display: showOtherInv ? 'block' : 'none' }}>
+       <Header>  
+        <div> 
+        {'\n'}
+          Trunk | Inventory 
+          {'\n'}
+         (<text style={{color: '#00FFFF'}}> 08464836 </text>)
+          </div>
+        <Info>
+        <div> 
+        Capacity:<text style={{color: '#00FFFF'}}> {numRows2} / 72 </text>
+        {'\n'}
+        {'\n'}
+         Weight:<text style={{color: '#00FFFF'}}> {numRows2} / 256 </text>
+          </div>
+          </Info>
+        </Header>
+        <ItemsContainer>
+          <DndProvider
+            backend={TouchBackend}
+            options={{ enableMouseEvents: true, enableTouchEvents: false }}
+          >
+            {itemsother.map((item, index) => (
+              <Item
+                key={item.name}
+                item={item}
+                index={index}
+                moveItem={moveOtherItem}
+                />
+            ))}
+
+            <ItemPreview items={itemsother} />
+          </DndProvider>
+        </ItemsContainer>
+      </InventoryContainer> 
       <RangeSelectorModal
         onClose={() => setModalMetadata({ isOpen: false })}
         onConfirm={(selectedItemCount) => {
@@ -269,6 +305,7 @@ const App = () => {
           giveQuery({
             name: modalMetadata.item?.name,
             quantity: selectedItemCount,
+            data: "test",
             playerId: modalMetadata.targetPlayer?.playerId,
           });
 

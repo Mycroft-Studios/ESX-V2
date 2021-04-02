@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { DropTargetMonitor, useDrag, useDrop, XYCoord } from "react-dnd";
+import { useNuiQuery } from "../hooks/useNuiQuery";
+import MouseTooltip from 'react-sticky-mouse-tooltip';
 import styled from "styled-components";
 
 const StyledItem = styled.div`
@@ -9,8 +11,8 @@ const StyledItem = styled.div`
 
   position: relative;
 
-  background-color: rgba(60, 60, 60, 0.9);
-
+  background-color: rgba(50, 50, 50, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   &:hover {
     cursor: move;
   }
@@ -23,9 +25,18 @@ const Quantity = styled.span`
   color: white;
 `;
 
+const Info = styled.span`
+  height: 50px;
+  width: 190px;
+  background-color: rgba(0, 0, 0, 0.9);
+  border: solid 1px rgba(102, 178, 255, 1);
+  white-space: pre-wrap;
+  color: white;
+`;
+
 type ItemProps = {
   index: number;
-  item: { name: string; quantity: number };
+  item: { name: string; quantity: number};
   moveItem: (dragId: number, hoverId: number) => void;
 };
 
@@ -88,8 +99,20 @@ export const Item: React.FC<ItemProps> = ({ index, moveItem, item }) => {
     }),
   });
 
-  const opacity = isDragging ? 0.5 : 1;
+  const opacity = isDragging ? 0.6 : 1;
   drag(drop(ref));
+
+  const [useQuery] = useNuiQuery("use");
+  function sayHello() {
+     useQuery({name: item.name,quantity: 1});
+  }
+
+  const [dropQuery] = useNuiQuery("drop");
+  function dropItem() {
+     dropQuery({name: item.name,quantity: 1});
+  }
+
+  const [showHover, setShowHover] = React.useState(false);
 
   return (
     <StyledItem
@@ -97,9 +120,24 @@ export const Item: React.FC<ItemProps> = ({ index, moveItem, item }) => {
       style={{
         opacity,
         backgroundImage: `url('${imageUrl}')`,
+        zIndex: 1,
       }}
+      onDoubleClick={sayHello}
+      onContextMenu={dropItem}
+      onMouseEnter={() => setShowHover(true)}
+      onMouseLeave={() => setShowHover(false)}
     >
-      <Quantity>{item.quantity}</Quantity>
+      <MouseTooltip
+          visible={showHover}
+          offsetX={15}
+          offsetY={10}
+        >
+      <Info>
+          Name |<text style={{color: '#009ACD'}}> {item.name} </text>
+          {'\n'}
+          Quantity | <text style={{color: '#009ACD'}}> {item.quantity} </text>
+         </Info>
+        </MouseTooltip>
     </StyledItem>
   );
 };

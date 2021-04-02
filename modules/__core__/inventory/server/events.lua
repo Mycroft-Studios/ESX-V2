@@ -73,9 +73,20 @@ onClient('esx:inventory:give', function(payload)
   end
 end)
 
-
 onRequest('esx:inventory:get', function(source, cb)
   local inventory = Player.fromId(source):getIdentity():getInventory()
 
   cb(inventory:serialize())
+end)
+
+onRequest('esx:inventory:getPlayerName', function(source, cb)
+	local player = Player.fromId(source)
+
+  if player then
+    local playerData = player:getIdentity()
+    local firstname  = playerData:getFirstName()
+    local lastname   = playerData:getLastName()
+    local name = ("".. firstname.. " ".. lastname)  
+    cb(name)
+  end
 end)
