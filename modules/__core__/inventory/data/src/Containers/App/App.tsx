@@ -92,21 +92,29 @@ right: 1%;
 flex-basis: 0;
 `;
 
-export type Item = { name: string; quantity: number};
+interface Item {
+  name: string
+  quantity: number
+}
+
+interface Player {
+  distance: number
+  playerId: string
+}
+
 export type Name = { name: string};
 export type ID = { id: string};
 export type Capacity = { lengh: number };
-export type Player = { distance: number; playerId: string };
-
 
 const App = () => {
-  const [modalMetadata, setModalMetadata] = useState<{
-    targetPlayer?: { distance: number; playerId: string };
+  interface ModalMetaData {
+    targetPlayer?: Player;
     itemCount?: number;
-    item?: { name: string; quantity: number};
+    item?: Item;
     isOpen: boolean;
-  }>({ isOpen: false });
+}
 
+const [modalMetadata, setModalMetadata] = useState<ModalMetaData>({ isOpen: false })
   const isBrowser = useIsBrowser();
 
   const [items, setItems] = useState<Item[]>([]);
@@ -305,7 +313,6 @@ const App = () => {
           giveQuery({
             name: modalMetadata.item?.name,
             quantity: selectedItemCount,
-            data: "test",
             playerId: modalMetadata.targetPlayer?.playerId,
           });
 
