@@ -4,7 +4,7 @@ game 'gta5'
 
 description 'ESX'
 
-version '2.0.1'
+version '2.0.5'
 
 ui_page 'hud/index.html'
 
