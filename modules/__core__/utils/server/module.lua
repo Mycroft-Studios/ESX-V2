@@ -10,3 +10,37 @@
 --   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
 --   This copyright should appear in every part of the project code
 
+module.PlayersToHide = {}
+module.server = module.server or {}
+
+module.game.createVehicle = function (model, coords, heading, cb)
+  if type(model) == 'string' then
+    model = GetHashKey(model)
+  end
+
+  local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, heading, true, false)
+
+  if vehicle and cb then
+    cb(vehicle)
+  end
+end
+
+module.game.createLocalVehicle = function(model, coords, heading, cb)
+  if type(model) == 'string' then
+    model = GetHashKey(model)
+  end
+
+  local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, heading, false, false)
+
+  if vehicle and cb then
+    cb(vehicle)
+  end
+end
+
+module.server.systemMessage = function(message)
+  TriggerClientEvent('chat:addMessage', -1, {
+    color = { 255, 0, 0},
+    multiline = true,
+    args = {"System", message}
+  })
+end

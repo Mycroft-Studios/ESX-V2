@@ -10,22 +10,74 @@
 --   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
 --   This copyright should appear in every part of the project code
 
+onRequest('esx:identity:register', function(source, cb, data)
 
-M('player')
+  local player = Player.fromId(source)
 
-onRequest('esx:identity:check', function(source, cb)
-  local player = xPlayer.fromId(source)
-  cb(player:getFirstName() and player:getLastName() and player:getDOB())
+  Identity.registerForPlayer(data, player, cb)
+
 end)
 
-onClient('esx:identity:register', function(data)
+onRequest('esx:identity:selectIdentity', function(source, cb, identityId)
 
-  local source = source
-  local player = xPlayer.fromId(source)
+  local player = Player.fromId(source)
 
-  player:setFirstName(data.firstName)
-  player:setLastName (data.lastName)
-  player:setDOB      (data.dob)
-  player:setIsMale   (data.isMale)
+  Identity.findOne({id = identityId}, function(identity)
+    if identity == nil then
+      return cb(nil)
+    end
 
+    Identity.loadForPlayer(identity, player)
+
+    cb(identity:serialize())
+  end)
+
+end)
+
+onRequest('esx:cache:identity:get', function(source, cb, id)
+
+  local player = Player.fromId(source)
+
+  local instance = Identity.all[id]
+
+  if instance then
+
+    cb(true, {instance:serialize()})
+
+  else
+
+    Identity.allFromPlayer(player, cb, true)
+
+  end
+
+end)
+
+onRequest('esx:identity:getSavedPosition', function(source, cb, id)
+  local player = Player.fromId(source)
+
+  MySQL.Async.fetchAll('SELECT position FROM identities WHERE id = @identityId AND owner = @owner', {
+    ['@identityId'] = player:getIdentityId(),
+    ['@owner']      = player.identifier
+  }, function(result)
+    if result then
+      if result[1] then
+        local pos = json.decode(result[1].position)
+        cb(pos)
+      else
+        cb(false)
+      end
+    else
+      cb(false)
+    end
+  end)
+end)
+
+onClient('esx:identity:updatePosition', function(position)
+  local player = Player.fromId(source)
+
+  MySQL.Async.execute('UPDATE identities SET position = @position WHERE id = @id AND owner = @owner', {
+    ['@position'] = json.encode(position),
+    ['@id']       = player:getIdentityId(),
+    ['@owner']    = player.identifier
+  })
 end)

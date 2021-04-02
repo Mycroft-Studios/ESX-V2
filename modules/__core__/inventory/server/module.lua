@@ -1,237 +1,137 @@
--- Copyright (c) Jérémie N'gadi
---
--- All rights reserved.
---
--- Even if 'All rights reserved' is very clear :
---
---   You shall not use any piece of this software in a commercial product / service
---   You shall not resell this software
---   You shall not provide any facility to install this particular software in a commercial product / service
---   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
---   This copyright should appear in every part of the project code
+M('class')
+M('persistent')
+M('events')
+M('table')
+M('item')
 
-self.Inventories = {}
+local InventoryMixin = Extends(nil, 'InventoryMixin')
 
-function Inventory.isItemDefined(name)
-  return table.indexOf(Inventory.ItemDefs, name) ~= -1
+function InventoryMixin:constructor()
+  self.test = "nil"
 end
 
-function Inventory:constructor(name, owner, items)
-
-  if module.Inventories[name] ~= nil then
-    print('[warning] there is already an active instance of inventory => ' .. name .. ' returning that instance')
-    return module.Inventories[name]
+-- @TODO: metadata
+function InventoryMixin:add(itemName, quantity, metadata)
+  if not(Items[itemName]) then
+    ESX.LogWarning(("Cannot add %i %s, %s isn't registered."):format(quantity, itemName, itemName))
+    return self
   end
 
-  self.super:constructor()
-
-  self.ready = false
-  self.name  = name
-
-  if owner then
-    self.owner  = owner
-    self.shared = true
-  else
-    self.owner  = nil
-    self.shared = false
-  end
-
-  self.items   = items or {}
-  self.ensured = false
-
-  self:on('ensure', function()
-
-    self.ensured = true
-    self.ready   = true
-
-    self:emit('ready')
-
+  -- find if the item already exists in the inventory content
+  local existingItem = table.find(self.content, function(item) 
+    return item.name == itemName
   end)
 
-  self:ensure()
+  if existingItem ~= nil then
+    -- add quantity
+    existingItem.quantity = existingItem.quantity + quantity
+  else
+    -- create new item with quantity
+    table.insert(self.content, { name = itemName, quantity = quantity})
+  end
 
-  module.Inventories[name] = self
-
-  print('new inventory => ' .. self.name)
-
+  return self
 end
 
-function Inventory:ensure(cb)
+-- @TODO: metadata
+function InventoryMixin:remove(itemName, quantity, metadata)
+  if not(Items[itemName]) then
+    ESX.LogWarning(("Cannot remove %i %s, %s isn't registered."):format(quantity, itemName, itemName))
+    return self
+  end
 
-  MySQL.Async.fetchAll('SELECT * FROM inventories WHERE name = @name',{['@name'] = self.name}, function(rows)
+  -- find if the item already exists in the inventory content
+  local existingItemIndex = table.findIndex(self.content, function(item) 
+    return item.name == itemName
+  end)
+  local existingItem = self.content[existingItemIndex]
 
-    if rows[1] then
+  if existingItem ~= nil then
 
-      local row = rows[1]
+    local endCount = existingItem.quantity - quantity
 
-      self.owner  = row.owner
-      self.shared = not not row.owner
-      self.items  = json.decode(row.items)
-
-      self:emit('ensure')
-
-      if cb then
-        cb()
-      end
-
+    if endCount < 0 then
+      ESX.LogWarning(("Removed %i %s, endCount is < 0."):format(quantity, itemName))
+      existingItem.quantity = endCount
+    elseif (endCount == 0) then
+      -- remove item from the content
+      table.remove(self.content, existingItemIndex)
     else
-
-      local shared = 0
-
-      if self.shared then
-        shared = 1
-      end
-
-      MySQL.Async.execute('INSERT INTO `inventories` (name, owner, items) VALUES (@name, @owner, @items)', {
-        ['@name']  = self.name,
-        ['@owner'] = owner,
-        ['@items'] = json.encode(self.items)
-      }, function(rowsChanged)
-
-        self:emit('ensure')
-
-        if cb then
-          cb()
-        end
-
-      end)
-
+      existingItem.quantity = endCount
     end
 
-  end)
-
-end
-
-function Inventory:save(cb)
-
-  Citizen.CreateThread(function()
-
-    while not self.ready do
-      Citizen.Wait(0)
-    end
-
-    MySQL.Async.execute('UPDATE `inventories` SET items = @items WHERE name = @name', {
-      ['@name']  = self.name,
-      ['@items'] = json.encode(self.items)
-    }, function()
-
-      self:emit('save')
-
-      if cb then
-        cb()
-      end
-
-    end)
-
-  end)
-
-end
-
-function Inventory:get(name, full)
-
-  if name then
-
-    if not Inventory.isItemDefined(name) then
-      error('item [' .. name .. '] is not defined in config')
-    end
-
-    return self.items[name]
   else
-    return self.items
+    -- create new item with quantity
+    table.insert(self.content, { name = itemName, quantity = quantity})
   end
 
+  return self
 end
 
-function Inventory:set(name, count)
-
-  if not Inventory.isItemDefined(name) then
-    error('item [' .. name .. '] is not defined in config')
+function InventoryMixin:has(itemName, quantity)
+  if not(Items[itemName]) then
+    ESX.LogWarning(("Cannot say if inventory has %i %s, %s isn't registered."):format(quantity, itemName, itemName))
+    return self
   end
 
-  if data == nil then
-    self.items = name
-  elseif count == 0 then
-    self.items[name] = nil
-  else
-    self.items[name] = count
-  end
+  quantity = quantity or 0
 
+  local existingItem = table.find(self.content, function(item) 
+    return item.name == itemName
+  end)
+
+  return (existingItem and existingItem.quantity >= quantity)
 end
 
-function Inventory:add(name, count)
-
-  if not Inventory.isItemDefined(name) then
-    error('item [' .. name .. '] is not defined in config')
+function InventoryMixin:hasExactly(itemName, quantity)
+  if not(Items[itemName]) then
+    ESX.LogWarning(("Cannot say if inventory has %i %s, %s isn't registered."):format(quantity, itemName, itemName))
+    return self
   end
 
-  if self.items[name] == nil then
-    self.items[name] = 0
-  end
+  quantity = quantity or 0
 
-  self.items[name] = self.items[name] + count
+  local existingItem = table.find(self.content, function(item) 
+    return item.name == itemName
+  end)
 
-  if self.items[name] == 0 then
-    self.items[name] = nil
-  end
-
-  if count < 0 then
-    self:emit('remove', name, math.abs(count))
-  elseif count > 0 then
-    self:emit('add', name, count)
-  end
-
+  return (existingItem and existingItem.quantity == quantity)
 end
 
-function Inventory:remove(name, count)
+function InventoryMixin:reorder(items)
+  local isAuthorizeToReorder = true
 
-  if not Inventory.isItemDefined(name) then
-    error('item [' .. name .. '] is not defined in config')
+  for i=1,#items do
+    if not(self:hasExactly(items[i].name, items[i].quantity)) then
+      isAuthorizeToReorder = false
+      break
+    end
   end
 
-  if self.items[name] == nil then
-    self.items[name] = 0
+  if not(isAuthorizeToReorder) then
+    ESX.LogWarning(("Someone tried to cheat (give item) when reordering inventory, identory identifier: %s, owner: %s."):format(self.identifier, self.owner))
+    return
   end
 
-  self.items[name] = self.items[name] - count
-
-  if self.items[name] == 0 then
-    self.items[name] = nil
-  end
-
-  if count < 0 then
-    self:emit('add', name, math.abs(count))
-  elseif count > 0 then
-    self:emit('remove', name, count)
-  end
-
+  -- we're safe to reorder here
+  self.content = items
 end
 
-on('esx:db:ready', function()
+Inventory = Persist('inventories', 'id', EventEmitter, InventoryMixin)
 
-  local inventory = Inventory:create('test')
+Inventory.define({
+  {name = 'id',         field = {name = 'id',         type = 'INT',        length = nil, default = nil,                   extra = 'NOT NULL AUTO_INCREMENT'}},
+  {name = 'identifier', field = {name = 'identifier', type = 'VARCHAR',    length = 64,  default = 'UUID()',              extra = 'NOT NULL'}},
+  {name = 'owner',      field = {name = 'owner',      type = 'VARCHAR',    length = 64,  default  = nil,                  extra = 'NOT NULL'}},
+  {name = 'content',    field = {name = 'content',    type = 'JSON',       length = nil, default = json.encode({}),       extra = 'NOT NULL'}, encode = json.encode, decode = json.decode},
+})
 
-  inventory:on('save', function()
-    print(inventory.name .. ' saved => ' .. inventory:get())
-  end)
+Inventory.all = setmetatable({}, {
+  __index    = function(t, k) return rawget(t, tostring(k)) end,
+  __newindex = function(t, k, v) rawset(t, tostring(k), v) end,
+})
 
-  inventory:on('add', function(amount)
-    print('add', amount)
-  end)
-
-  inventory:on('remove', function(amount)
-    print('remove', amount)
-  end)
-
-  inventory:on('ready', function()
-
-    inventory:set('something', 15)
-    inventory:set('something', 10)
-
-    inventory:save(function()
-      print('callbacks also')
-    end)
-
-  end)
-
-end)
+Inventory.fromOwner = function(owner)
+  return Identity.all[owner]
+end
 

@@ -1,24 +1,92 @@
--- Copyright (c) Jérémie N'gadi
---
--- All rights reserved.
---
--- Even if 'All rights reserved' is very clear :
---
---   You shall not use any piece of this software in a commercial product / service
---   You shall not resell this software
---   You shall not provide any facility to install this particular software in a commercial product / service
---   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
---   This copyright should appear in every part of the project code
-
 M('events')
+M('item')
+M('table')
+M('string')
 
-on('esx:db:init', function(initTable, extendTable)
+-- on("esx:items:update", function()
+--   print("receiving esx:items:update")
+-- end)
 
-  initTable('inventories', 'name', {
-    {name = 'name',  type = 'VARCHAR',  length = 255, default = nil,    extra = 'NOT NULL'},
-    {name = 'owner', type = 'VARCHAR',  length = 64,  default = 'NULL', extra = nil},
-    {name = 'items', type = 'LONGTEXT', length = nil, default = 'NULL', extra = nil},
-  })
+-- register an event handler when a player laod
+on("esx:player:load", function(player)
+  -- register an even handler on the loaded player and wait
+  -- for its identity to be laoded
+  player:on("identity:loaded", function(identity)
+    local identityOwner = identity:getIdentifier()
+    Inventory.ensure({
+      owner = "identity:" .. identityOwner
+    }, {
+      owner = "identity:" .. identityOwner,
+    }, function(inventory)
+      Inventory.all[inventory.owner] = inventory
+      identity:field("inventory", inventory)
 
+      emitClient("esx:inventory:loaded", player:getSource(), inventory:serialize())
+    end)
+  end)
 end)
 
+onClient('esx:inventory:reorder', function(items)
+  local inventory = Player.fromId(source):getIdentity():getInventory()
+
+  -- reorder check if items is included in the current content.
+  inventory:reorder(items)
+end)
+
+onClient('esx:inventory:give', function(payload)
+  local sourcePlayer = Player.fromId(source)
+  local sourceInventory = sourcePlayer:getIdentity():getInventory()
+
+  local itemName = payload.name
+  local quantity = payload.quantity
+  local target = payload.target
+
+  local splittedTarget = string.split(target, ":")
+
+  local targetType = splittedTarget[1]
+  local targetId = splittedTarget[2]
+
+  if (targetType == "player") then
+    local targetPlayer = Player.fromId(targetId)
+
+    -- @TODO: check targetPlayer exists
+    -- @TODO: check targetPlayer is near the sourcePlayer
+
+    local targetInventory = targetPlayer:getIdentity():getInventory()
+
+    -- verify source has requested item quantity
+    local hasItemQuantity = sourceInventory:has(itemName, quantity)
+    if not(hasItemQuantity) then
+      print("doesn't has item quantity")
+      return
+    end
+
+    print("giving x" .. quantity .. " " .. itemName .. " to " .. targetId .. " from " .. source)
+
+    -- transaction
+    sourceInventory:remove(itemName, quantity)
+    targetInventory:add(itemName, quantity)
+
+    -- notify changed
+    emitClient("esx:inventory:update", source, sourceInventory:serialize())
+    emitClient("esx:inventory:update", targetId, targetInventory:serialize())
+  end
+end)
+
+onRequest('esx:inventory:get', function(source, cb)
+  local inventory = Player.fromId(source):getIdentity():getInventory()
+
+  cb(inventory:serialize())
+end)
+
+onRequest('esx:inventory:getPlayerName', function(source, cb)
+	local player = Player.fromId(source)
+
+  if player then
+    local playerData = player:getIdentity()
+    local firstname  = playerData:getFirstName()
+    local lastname   = playerData:getLastName()
+    local name = ("".. firstname.. " ".. lastname)  
+    cb(name)
+  end
+end)

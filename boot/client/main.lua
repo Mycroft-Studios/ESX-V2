@@ -10,27 +10,16 @@
 --   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
 --   This copyright should appear in every part of the project code
 
-local self = ESX.Modules['boot']
+local module = ESX.Modules['boot']
+local HUD    = module.LoadModule('game.hud', true)
 
-local HUD = self.LoadModule('game.hud', true)
-
--- Join
-Citizen.CreateThread(function()
-
-  while true do
-		Citizen.Wait(0)
-
-		if NetworkIsPlayerActive(PlayerId()) then
-			emitServer('esx:onPlayerJoined')
-			break
-		end
-  end
-
-end)
+-- Clear spawnLock
+if exports.spawnmanager ~= nil then -- TODO remove check if https://github.com/citizenfx/cfx-server-data/pull/104 is merged
+  exports.spawnmanager:forceRespawn()
+end
 
 -- Pause menu disables HUD display
 if Config.EnableHud then
-
   ESX.SetInterval(300, function()
 
     if IsPauseMenuActive() and not ESX.IsPaused then
@@ -42,163 +31,74 @@ if Config.EnableHud then
     end
 
   end)
-
 end
-
-local shootTimeout = nil
-
-ESX.SetInterval(300, function()
-
-  if ESX.PlayerLoaded and (not ESX.IsDead) then
-
-    local playerPed = PlayerPedId()
-
-    if IsPedShooting(playerPed) then
-
-      if shootTimeout ~= nil then
-        ESX.ClearTimeout(shootTimeout)
-      end
-
-      shootTimeout = ESX.SetTimeout(1000, function()
-
-        local _,weaponHash = GetCurrentPedWeapon(playerPed, true)
-        local weapon = ESX.GetWeaponFromHash(weaponHash)
-
-        if weapon then
-          local ammoCount = GetAmmoInPedWeapon(playerPed, weaponHash)
-          emitServer('esx:updateWeaponAmmo', weapon.name, ammoCount)
-        end
-
-      end)
-
-    end
-
-  end
-
+-- Will disable the idle camera
+ESX.SetInterval(15000, function()
+  InvalidateIdleCam()
 end)
-
-local previousCoords
-
-ESX.SetInterval(1000, function()
-
-  if ESX.PlayerLoaded and (not ESX.IsDead) then
-
-    local playerPed = PlayerPedId()
-
-    if DoesEntityExist(playerPed) then
-
-      local playerCoords = GetEntityCoords(playerPed)
-      previousCoords     = previousCoords or playerCoords
-      local distance     = #(playerCoords - previousCoords)
-
-      if distance > 1 then
-        previousCoords = playerCoords
-        local playerHeading = math.round(GetEntityHeading(playerPed), 1)
-        local formattedCoords = {x = math.round(playerCoords.x, 1), y = math.round(playerCoords.y, 1), z = math.round(playerCoords.z, 1), heading = playerHeading}
-        emitServer('esx:updateCoords', formattedCoords)
-      end
-
-    end
-
+--- Will remove cops from an area
+ESX.SetInterval(5, function()
+  local playerPed = PlayerPedId()
+  local playerLocalisation = GetEntityCoords(playerPed)
+  ClearAreaOfCops(playerLocalisation.x, playerLocalisation.y, playerLocalisation.z, 400.0)
+end)
+--- Toggles dispath for all categories
+Citizen.CreateThread(function()
+  for i = 1, 15 do
+	EnableDispatchService(i, false)
+  end
+end)
+--- Disable certain gameplay elements depending on config settings
+ESX.SetInterval(1, function()
+  if Config.DisableDefaultHud then
+    HideHudComponentThisFrame(3)
+    HideHudComponentThisFrame(4)
+    HideHudComponentThisFrame(6)
+    HideHudComponentThisFrame(7)
+    HideHudComponentThisFrame(8)
+    HideHudComponentThisFrame(9)
+    HideHudComponentThisFrame(13)
+    HideHudComponentThisFrame(19)
   end
 
+  if Config.DisableVehicleRewards then
+    DisablePlayerVehicleRewards(PlayerId())
+  end
+
+  if Config.DisableNPCDrops then
+    RemoveAllPickupsOfType(0xDF711959) -- carbine rifle
+    RemoveAllPickupsOfType(0xF9AFB48F) -- pistol
+    RemoveAllPickupsOfType(0xA9355DCD) -- pumpshotgun
+  end
+
+  if Config.DisableHealthRegeneration then
+    SetPlayerHealthRechargeMultiplier(PlayerId(), 0.0)
+  end
+
+  if Config.DisableWeaponWheel then
+    BlockWeaponWheelThisFrame();
+	DisableControlAction(0, 37,true);
+  end
+
+  if Config.DisableAimAssist then
+    if IsPedArmed(PlayerPedId(), 4) then
+      SetPlayerLockonRangeOverride(PlayerId(), 2.0)
+    end
+  end
 end)
 
 -- Disable wanted level
 if Config.DisableWantedLevel then
-
-  Citizen.CreateThread(function()
-
-    local playerId = PlayerId()
-
-    if GetPlayerWantedLevel(playerId) ~= 0 then
-      SetPlayerWantedLevel(playerId, 0, false)
-      SetPlayerWantedLevelNow(playerId, false)
-    end
-
-    Citizen.Wait(0)
-
-  end)
-
+  SetMaxWantedLevel(0)
 end
 
--- Pickups
-local pickupsInRange      = {}
-local closestUsablePickup = nil
-
-ESX.SetInterval(500, function()
-
-  local playerPed    = PlayerPedId()
-  local playerCoords = GetEntityCoords(playerPed)
-
-  pickupsInRange      = {}
-  closestUsablePickup = nil
-
-  for pickupId, pickup in pairs(ESX.Pickups) do
-
-    local distance = #(playerCoords - pickup.coords)
-
-    if distance < 5.0 then
-
-      pickupsInRange[#pickupsInRange + 1] = pickup
-
-      if distance < 1.0 then
-        closestUsablePickup = pickup
-      end
-
-    end
-
-  end
-
-end)
-
-Citizen.CreateThread(function()
-
-  local playerPed    = PlayerPedId()
-  local playerCoords = GetEntityCoords(playerPed)
-
-  for i=1, #pickupsInRange, 1 do
-
-    local pickup = pickupsInRange[i]
-
-    ESX.ShowFloatingHelpNotification(pickup.label, {
-      x = pickup.coords.x,
-      y = pickup.coords.y,
-      z = pickup.coords.z + 0.25
-    }, 100)
-
-  end
-
-  Citizen.Wait(0)
-
-end)
-
-Citizen.CreateThread(function()
-
-  if closestUsablePickup ~= nil then
-
-    local playerPed = PlayerPedId()
-    local pickup    = closestUsablePickup
-
-    if IsControlJustReleased(0, 38) then
-      if IsPedOnFoot(playerPed) then
-
-        Citizen.CreateThread(function()
-
-          local dict, anim = 'weapons@first_person@aim_rng@generic@projectile@sticky_bomb@', 'plant_floor'
-          ESX.Streaming.RequestAnimDict(dict)
-          TaskPlayAnim(playerPed, dict, anim, 8.0, 1.0, 1000, 16, 0.0, false, false, false)
-          Citizen.Wait(1000)
-          emitServer('esx:onPickup', pickup.id)
-          PlaySoundFrontend(-1, 'PICK_UP', 'HUD_FRONTEND_DEFAULT_SOUNDSET', false)
-
-        end)
-
-      end
-    end
-
-  end
-
-  Citizen.Wait(0)
-
-end)
+--RichPresence
+if Config.EnableRichPresence then
+  local playerId = PlayerId()
+  SetDiscordAppId(tonumber(GetConvar("RichAppId", "757218164345012224")))  -- Change for your APP id there's https://discord.com/developers/applications
+  SetDiscordRichPresenceAsset(GetConvar("RichAssetId", "esx_test"))  -- Edit esx_text with your own image. Must be one of your Discord Application
+  SetDiscordRichPresenceAssetText("Playing on a ESX2 Server!") -- Edit this with a message or something else you want to show
+  SetDiscordRichPresenceAssetSmall(GetConvar("RichAssetId", "esx_test")) -- Edit esx_text with your own image. Must one of your Discord Application
+  SetRichPresence("This server is running ESX2!") -- Edit this with a message or something else you want to show
+  SetDiscordRichPresenceAssetSmallText(GetPlayerName(playerId) .. " with id " .. GetPlayerServerId(playerId)) -- Edit this with a message or something else you want to show
+end

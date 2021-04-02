@@ -65,14 +65,15 @@ export default {
 		copy({
 			targets: [
         {
-          src : path.join(__dirname, 'public/*')                                   .replace(/\\/g, '/'),
-          dest: path.join(__dirname, '../../../modules/__core__/ui.menu/data/html').replace(/\\/g, '/')
+          src : 'public/*'                                   .replace(/\\/g, '/'),
+          dest: '../../../modules/__core__/ui.menu/data/html'.replace(/\\/g, '/')
         }
       ],
 		})
 	],
 	watch: {
-		clearScreen: true
+		clearScreen: true,
+		chokidar: false
 	}
 };
 

@@ -12,12 +12,29 @@
 
 -- Immediate definitions
 
-local _print = print
+local __print = print
+--- Altered print with ESX prefix
+_print = function(...)
 
+  local args = {...}
+  local str  = '[^4esx^7'
+
+  for i=1, #args, 1 do
+    if i == 1 then
+      str = str .. '' .. tostring(args[i])
+    else
+      str = str .. ' ' .. tostring(args[i])
+    end
+  end
+
+  __print(str)
+
+end
+--- Attach custom _print method to global print
 print = function(...)
 
   local args = {...}
-  local str  = '[^4esx^7]'
+  local str  = ']'
 
   for i=1, #args, 1 do
     str = str .. ' ' .. tostring(args[i])
@@ -26,7 +43,7 @@ print = function(...)
   _print(str)
 
 end
-
+--- Local index of check
 local tableIndexOf = function(t, val)
 
   for i=1, #t, 1 do
@@ -40,66 +57,105 @@ local tableIndexOf = function(t, val)
 end
 
 -- ESX base
-ESX                   = {}
-ESX.Loaded            = false
-ESX.Ready             = false
-ESX.Modules           = {}
-ESX.TimeoutCount      = 1
-ESX.CancelledTimeouts = {}
+ESX                = {}
+ESX.Loaded         = false
+ESX.Ready          = false
+ESX.Modules        = {}
+ESX.TaskCount      = 1
+ESX.CancelledTasks = {}
 
 ESX.GetConfig = function()
   return Config
 end
-
+--- Log an error
+---@param err string Error to log
+---@param loc string Location error took place
 ESX.LogError = function(err, loc)
   loc = loc or '<unknown location>'
   print(debug.traceback('^1[error] in ^5' .. loc .. '^7\n\n^5message: ^1' .. err .. '^7\n'))
 end
 
+--- Log a warning
+---@param warningMessage string Warning to log
+ESX.LogWarning = function(warningMessage)
+  print('^3[warning]^7 ' .. warningMessage)
+end
+
+--- Evaluate code within a file
+---@param resource string The resource name that is being eval'ed
+---@param file string Filename
+---@param env string Any env variables
 ESX.EvalFile = function(resource, file, env)
 
   env           = env or {}
   env._G        = env
   local code    = LoadResourceFile(resource, file)
-  local fn      = load(code, '@' .. resource .. ':' .. file, 't', env)
+  local fn, err = load(code, '@' .. resource .. ':' .. file, 't', env)
+
   local success = true
+
+  if (err) then
+    ESX.LogError(err, '@' .. resource .. ':' .. file)
+    return env, success
+  end 
 
   local status, result = xpcall(fn, function(err)
     success = false
-    ESX.LogError(err, trace, '@' .. resource .. ':' .. file)
+    ESX.LogError(err, '@' .. resource .. ':' .. file)
   end)
 
   return env, success
 
 end
 
+ESX.GetTaskId = function()
+
+  local id      = (ESX.TaskCount + 1 < 65635) and (ESX.TaskCount + 1) or 1
+  ESX.TaskCount = id
+
+  return id
+
+end
+
+ESX.ClearTask = function(id)
+  ESX.CancelledTasks[id] = true
+end
+
+ESX.AckClearedTask = function(id)
+  ESX.CancelledTasks[id] = nil
+end
+
+ESX.IsTaskCancelled = function(id)
+  return ESX.CancelledTasks[id]
+end
+--- A function to execute after x ms with a callback
+---@param msec number Milliseconds till execution of callback
+---@param cb function Callback function to run
 ESX.SetTimeout = function(msec, cb)
 
-  local id = (ESX.TimeoutCount + 1 < 65635) and (ESX.TimeoutCount + 1) or 1
+  local id = ESX.GetTaskId()
 
   SetTimeout(msec, function()
 
-    if ESX.CancelledTimeouts[id] then
-      ESX.CancelledTimeouts[id] = nil
+    if ESX.CancelledTasks[id] then
+      ESX.AckClearedTask(id)
     else
       cb()
     end
 
   end)
 
-  ESX.TimeoutCount = id;
-
   return id
 
 end
 
-ESX.ClearTimeout = function(id)
-  ESX.CancelledTimeouts[id] = true
-end
-
+ESX.ClearTimeout = ESX.ClearTask
+--- Run a callback every x number of milliseconds
+---@param msec number Millisecond interval to run callback
+---@param cb function Callback function
 ESX.SetInterval = function(msec, cb)
 
-  local id = (ESX.TimeoutCount + 1 < 65635) and (ESX.TimeoutCount + 1) or 1
+  local id = ESX.GetTaskId()
 
   local run
 
@@ -107,8 +163,8 @@ ESX.SetInterval = function(msec, cb)
 
     ESX.SetTimeout(msec, function()
 
-      if ESX.CancelledTimeouts[id] then
-        ESX.CancelledTimeouts[id] = nil
+      if ESX.IsTaskCancelled(id) then
+        ESX.AckClearedTask(id)
       else
         cb()
         run()
@@ -118,35 +174,64 @@ ESX.SetInterval = function(msec, cb)
 
   end
 
-  ESX.TimeoutCount = id;
-
   run()
 
   return id
 
 end
 
-ESX.ClearInterval = function(id)
-  ESX.CancelledTimeouts[id] = true
+ESX.ClearInterval = ESX.ClearTask
+--- Run a function every tick
+---@param fn function Function to run
+ESX.SetTick = function(fn)
+
+  local id = ESX.GetTaskId()
+
+  Citizen.CreateThread(function()
+
+    while not ESX.IsTaskCancelled(id) do
+      fn()
+      Citizen.Wait(0)
+    end
+
+    ESX.AckClearedTask(id)
+
+  end)
+
+  return id
+
 end
+
+ESX.ClearTick = ESX.ClearTask
 
 -- ESX main module
 ESX.Modules['boot'] = {}
-local self              = ESX.Modules['boot']
+local module        = ESX.Modules['boot']
 
 local resName = GetCurrentResourceName()
 local modType = IsDuplicityVersion() and 'server' or 'client'
 
-self.CoreEntries = json.decode(LoadResourceFile(resName, 'modules/__core__/modules.json'))
-self.Entries     = json.decode(LoadResourceFile(resName, 'modules.json'))
+module.GroupNames        = json.decode(LoadResourceFile(resName, 'config/modules.groups.json'))
+module.Groups            = {}
+module.Entries           = {}
+module.EntriesOrders     = {}
 
-self.CoreOrder   = {}
-self.Order       = {}
+for i=1, #module.GroupNames, 1 do
 
-self.GetModuleEntryPoints = function(name)
+  local groupName        = module.GroupNames[i]
+  local modules          = json.decode(LoadResourceFile(resName, 'modules/__' .. groupName .. '__/modules.json'))
+  module.Groups[groupName] = modules
 
-  local isCore          = self.IsCoreModule(name)
-  local prefix          = isCore and '__core__/' or ''
+  for j=1, #modules, 1 do
+    local modName           = modules[j]
+    module.Entries[modName] = groupName
+  end
+
+end
+
+module.GetModuleEntryPoints = function(name, group)
+
+  local prefix          = '__' .. group .. '__/'
   local shared, current = false, false
 
   if LoadResourceFile(resName, 'modules/' .. prefix .. name .. '/shared/module.lua') ~= nil then
@@ -161,28 +246,20 @@ self.GetModuleEntryPoints = function(name)
 
 end
 
-self.IsCoreModule = function(name)
-  return tableIndexOf(self.CoreEntries, name) ~= -1
+module.IsModuleInGroup = function(name, group)
+  return module.Entries[name] ~= nil
 end
 
-self.IsUserModule = function(name)
-  return tableIndexOf(self.Entries, name) ~= -1
+module.GetModuleGroup = function(name)
+  return module.Entries[name]
 end
 
-self.DoesModuleExist = function(name)
-  return self.IsCoreModule(name) or self.IsUserModule(name)
-end
-
-self.ModuleHasEntryPoint = function(name)
-
-  local isCore          = self.IsCoreModule(name)
-  local shared, current = self.GetModuleEntryPoints(name, isCore)
-
+module.ModuleHasEntryPoint = function(name, group)
+  local shared, current = module.GetModuleEntryPoints(name, group)
   return shared or current
-
 end
 
-self.createModuleEnv = function(name, isCore)
+module.CreateModuleEnv = function(name, group)
 
   local env = {}
 
@@ -190,23 +267,24 @@ self.createModuleEnv = function(name, isCore)
     env[k] = v
   end
 
+  env.__NAME__     = name
+  env.__GROUP__    = group
   env.__RESOURCE__ = resName
-  env.__ISCORE__   = isCore
-  env.__MODULE__   = name
+  env.__DIR__      = 'modules/__' .. group .. '__/' .. name
+  env.run          = function(file, _env) return ESX.EvalFile(env.__RESOURCE__, env.__DIR__ .. '/' .. file, _env or env) end
   env.module       = {}
-  env.self         = env.module
-  env.M            = self.LoadModule
+  env.M            = module.LoadModule
 
   env.print = function(...)
 
-    local args = {...}
-    local str  = '[^3' .. name .. '^7]'
+    local args   = {...}
+    local str    = '^7/^5' .. group .. '^7/^3' .. name .. '^7]'
 
     for i=1, #args, 1 do
       str = str .. ' ' .. tostring(args[i])
     end
 
-    print(str)
+    _print(str)
 
   end
 
@@ -218,37 +296,39 @@ self.createModuleEnv = function(name, isCore)
 
 end
 
-self.LoadModule = function(name)
-
-  local isCore = self.IsCoreModule(name)
-  local prefix = isCore and '__core__/' or ''
+module.LoadModule = function(name)
 
   if ESX.Modules[name] == nil then
 
-    if not self.DoesModuleExist(name) then
+    local group = module.GetModuleGroup(name)
+
+    if group == nil then
       ESX.LogError('module [' .. name .. '] is not declared in modules.json', '@' .. resName .. ':modules/__core__/__main__/module.lua')
     end
 
-    TriggerEvent('esx:module:load:before', name, isCore)
+    local prefix = '__' .. group .. '__/'
 
-    local menv            = self.createModuleEnv(name, isCore)
-    local shared, current = self.GetModuleEntryPoints(name, isCore)
+    module.EntriesOrders[group] = module.EntriesOrders[group] or {}
 
-    local env, success = nil, true
-    local _env, _success
+    TriggerEvent('esx:module:load:before', name, group)
+
+    local menv            = module.CreateModuleEnv(name, group)
+    local shared, current = module.GetModuleEntryPoints(name, group)
+
+    local env, success, _success = nil, true, false
 
     if shared then
 
       env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/shared/module.lua', menv)
 
       if _success then
-        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/shared/events.lua', env)
+        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/shared/events.lua', menv)
       else
         success = false
       end
 
       if _success then
-        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/shared/main.lua', env)
+        menv, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/shared/main.lua', menv)
       else
         success = false
       end
@@ -257,20 +337,16 @@ self.LoadModule = function(name)
 
     if current then
 
-      if env then
-        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/' .. modType .. '/module.lua', env)
-      else
-        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/' .. modType .. '/module.lua', menv)
-      end
+      env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/' .. modType .. '/module.lua', menv)
 
       if _success then
-        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/' .. modType .. '/events.lua', env)
+        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/' .. modType .. '/events.lua', menv)
       else
         success = false
       end
 
       if _success then
-        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/' .. modType .. '/main.lua', env)
+        env, _success = ESX.EvalFile(resName, 'modules/' .. prefix .. name .. '/' .. modType .. '/main.lua', menv)
       else
         success = false
       end
@@ -279,20 +355,16 @@ self.LoadModule = function(name)
 
     if success then
 
-      ESX.Modules[name] = env['module']
+      ESX.Modules[name] = menv['module']
 
-      if isCore then
-        self.CoreOrder[#self.CoreOrder + 1] = name
-      else
-        self.Order[#self.Order + 1] = name
-      end
+      module.EntriesOrders[group][#module.EntriesOrders[group] + 1] = name
 
-      TriggerEvent('esx:module:load:done', name, isCore)
+      TriggerEvent('esx:module:load:done', name, group)
 
     else
 
       ESX.LogError('module [' .. name .. '] does not exist', '@' .. resName .. ':modules/__core__/__main__/module.lua')
-      TriggerEvent('esx:module:load:error', name, isCore)
+      TriggerEvent('esx:module:load:error', name, group)
 
       return nil, true
 
@@ -304,4 +376,37 @@ self.LoadModule = function(name)
 
 end
 
-M = self.LoadModule
+module.Boot = function()
+
+  for i=1, #module.GroupNames, 1 do
+
+    local groupName = module.GroupNames[i]
+    local group     = module.Groups[groupName]
+
+    for j=1, #group, 1 do
+
+      local name = group[j]
+
+      if module.ModuleHasEntryPoint(name, groupName) then
+        M(name, groupName)
+      end
+
+    end
+
+  end
+
+  -- on('esx:ready', function()
+  --   print('^2ready^7')
+  -- end)
+
+  on('esx:cacheReady', function()
+    print('^2ready^7')
+  end)
+
+  ESX.Loaded = true
+
+  emit('esx:load')
+
+end
+
+M = module.LoadModule

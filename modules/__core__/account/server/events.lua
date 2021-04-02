@@ -10,15 +10,24 @@
 --   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
 --   This copyright should appear in every part of the project code
 
-M('events')
+local Cache = M("cache")
 
-on('esx:db:init', function(initTable, extendTable)
-
-  initTable('accounts', 'name', {
-    {name = 'name',  type = 'VARCHAR',  length = 255, default = nil,    extra = 'NOT NULL'},
-    {name = 'owner', type = 'VARCHAR',  length = 64,  default = 'NULL', extra = nil},
-    {name = 'money', type = 'int',      length = nil, default = 0,      extra = 'NOT NULL'},
-  })
-
+on('esx:account:addMoney', function(account, money, player)
+    Account.AddIdentityMoney(account, money, player)
 end)
 
+on('esx:account:removeMoney', function(account, money, player)
+    Account.RemoveIdentityMoney(account, money, player)
+end)
+
+onRequest('esx:account:getPlayerAccounts', function(source, cb)
+	local player = Player.fromId(source)
+
+	local accounts = Cache.RetrieveAccounts(player.identifier, player:getIdentityId())
+
+	if accounts then
+	  cb(accounts)
+	else
+	  cb(nil)
+	end
+end)

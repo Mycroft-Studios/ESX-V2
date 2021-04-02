@@ -13,171 +13,119 @@
 M('events')
 M('class')
 M('table')
+M('persistent')
+local Cache = M("cache")
+local Identity = M("identity")
 
-self.Accounts = {}
+module.Cache               = {}
+module.Cache.Accounts      = {}
+module.Cache.AccountsFound = false
 
-Account = Extends(EventEmitter)
+Account = {}
 
-function Account:constructor(name, owner, money)
+Account = Persist('accounts', 'id')
 
-  if (money == nil) or (tonumber(money) ~= money) then
-    money = 0
-  end
+Account.define({
+  {name = 'id',    field = {name = 'id',     type = 'INT',     length = nil, default = nil,    extra = 'NOT NULL AUTO_INCREMENT'}},
+  {name = 'name',  field = {name = 'name',   type = 'VARCHAR', length = 64,  default = nil,    extra = 'NOT NULL'}},
+  {name = 'owner', field = {name = 'owner',  type = 'VARCHAR', length = 64,  default = 'NULL', extra = nil}},
+  {name = 'money', field = {name = 'money',  type = 'INT',     length = nil, default = 0,      extra = nil}},
+})
 
-  if module.Accounts[name] ~= nil then
-    print('[warning] there is already an active instance of account => ' .. name .. ' returning that instance')
-    return module.Accounts[name]
-  end
-
-  self.super:constructor()
-
-  self.ready = false
-  self.name  = name
-
-  if owner then
-    self.owner  = owner
-    self.shared = true
-  else
-    self.owner  = nil
-    self.shared = false
-  end
-
-  self.money   = money
-  self.ensured = false
-
-  self:on('ensure', function()
-
-    self.ensured = true
-    self.ready   = true
-
-    self:emit('ready')
-
-  end)
-
-  self:ensure()
-
-  module.Accounts[name] = self
-
-  print('new account => ' .. self.name)
-
-end
-
-function Account:ensure(cb)
-
-  MySQL.Async.fetchAll('SELECT * FROM accounts WHERE name = @name',{['@name'] = self.name}, function(rows)
-
-    if rows[1] then
-
-      local row = rows[1]
-
-      self.owner  = row.owner
-      self.shared = not not row.owner
-      self.money  = row.money
-
-      self:emit('ensure')
-
-      if cb then
-        cb()
-      end
-
-    else
-
-      local shared = 0
-
-      if self.shared then
-        shared = 1
-      end
-
-      MySQL.Async.execute('INSERT INTO `accounts` (name, owner, money) VALUES (@name, @owner, @money)', {
-        ['@name']  = self.name,
-        ['@owner'] = owner,
-        ['@money'] = self.money
-      }, function(rowsChanged)
-
-        self:emit('ensure')
-
-        if cb then
-          cb()
+Account.AddIdentityMoney = function(account, money, player)
+  local accounts = Cache.RetrieveAccounts(player.identifier, player:getIdentityId())
+  if accounts then
+    if accounts[account] then
+      local transaction = Cache.AddMoneyToAccount(player.identifier, player:getIdentityId(), account, money)
+      if transaction.type == "success" then
+        emitClient('esx:account:notify', player.source, account, money, transaction.value)
+        if player then
+          emitClient('esx:account:showMoney', player.source, false)
+        else
+          emitClient('esx:account:showMoney', source, false)
         end
-
-      end)
-
-    end
-
-  end)
-
-end
-
-function Account:save(cb)
-
-  Citizen.CreateThread(function()
-
-    while not self.ready do
-      Citizen.Wait(0)
-    end
-
-    MySQL.Async.execute('UPDATE `accounts` SET money = @money WHERE name = @name', {
-      ['@name']  = self.name,
-      ['@money'] = self.money
-    }, function()
-
-      self:emit('save')
-
-      if cb then
-        cb()
+      else
+        emitClient('esx:account:transactionError', player.source)
       end
-
-    end)
-
-  end)
-
-end
-
-function Account:get()
-  return self.money
-end
-
-function Account:set(money)
-
-  local orig = self.money
-  self.money = money
-
-  if money < orig then
-    self:emit('remove', orig - money)
-  elseif money > orig then
-    self:emit('add', money - orig)
+    end
   end
-
 end
 
-function Account:add(money)
-
-  self.money = self.money + money
-
-  if money < 0 then
-    self:emit('remove', math.abs(money))
-  elseif money > 0 then
-    self:emit('add', money)
+Account.RemoveIdentityMoney = function(account, money, player)
+  local accounts = Cache.RetrieveAccounts(player.identifier, player:getIdentityId())
+  if accounts then
+    if accounts[account] then
+      local transaction = Cache.RemoveMoneyFromAccount(player.identifier, player:getIdentityId(), account, money)
+      if transaction.type == "success" then
+        emitClient('esx:account:notify', player.source, account, money, transaction.value)
+        if player then
+          emitClient('esx:account:showMoney', player.source, true)
+        else
+          emitClient('esx:account:showMoney', source, false)
+        end
+      elseif transaction.type == "not_enough_money" then
+        emitClient('esx:account:notEnoughMoney', player.source, account, money)
+        if player then
+          emitClient('esx:account:showMoney', player.source, true)
+        else
+          emitClient('esx:account:showMoney', source, false)
+        end
+      else
+        emitClient('esx:account:transactionError', player.source, account)
+      end
+    end
   end
-
 end
 
-function Account:remove(money)
 
-  self.money = self.money - money
+----------------------------------------------------------------------------------------------------
+--       EVERYTHING BELOW IS FOR SOCIETY ACCOUNTS IN THE FUTURE, PLEASE DO NOT REMOVE             --
+----------------------------------------------------------------------------------------------------
 
-  if money < 0 then
-    self:emit('add', math.abs(money))
-  elseif money > 0 then
-    self:emit('remove', money)
-  end
+-- function Account:setMoney(money)
 
-end
+--   local orig = self.money
+--   self.money = money
+
+--   if money < orig then
+--     self:emit('remove', orig - money)
+--   elseif money > orig then
+--     self:emit('add', money - orig)
+--   end
+
+-- end
+
+-- function Account:addMoney(money)
+
+--   self.money = self.money + money
+
+--   if money < 0 then
+--     self:emit('remove', math.abs(money))
+--   elseif money > 0 then
+--     self:emit('add', money)
+--   end
+
+-- end
+
+-- function Account:removeMoney(money)
+
+--   self.money = self.money - money
+
+--   if money < 0 then
+--     self:emit('add', math.abs(money))
+--   elseif money > 0 then
+--     self:emit('remove', money)
+--   end
+
+-- end
 
 --[[
 on('esx:db:ready', function()
 
-  local account = Account:create('test')
+  local account = Account({
+    name  = 'test',
+    money = 0,
+  })
 
   account:on('save', function()
     print(account.name .. ' saved => ' .. account:get())
@@ -191,22 +139,18 @@ on('esx:db:ready', function()
     print('remove', amount)
   end)
 
-  account:on('ready', function()
+  account:setMoney(0)
 
-    account:set(0)
+  account:setMoney(1000)
+  account:setMoney(250)
+  account:setMoney(2000)
+  account:removeMoney(5)
+  account:removeMoney(-100)
+  account:addMoney(5)
+  account:addMoney(-100)
 
-    account:set(1000)
-    account:set(250)
-    account:set(2000)
-    account:remove(5)
-    account:remove(-100)
-    account:add(5)
-    account:add(-100)
-
-    account:save(function()
-      print('callbacks also')
-    end)
-
+  account:save(function(id)
+    account:trace(id)
   end)
 
 end)

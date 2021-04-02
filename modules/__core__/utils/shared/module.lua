@@ -13,12 +13,13 @@
 M('table')
 
 -- Namespaces
-self.string  = self.string  or {}
-self.table   = self.table   or {}
-self.weapon  = self.weapon  or {}
-self.game    = self.game    or {}
-self.vehicle = self.vehicle or {}
-self.random  = self.random  or {}
+module.string  = module.string  or {}
+module.table   = module.table   or {}
+module.weapon  = module.weapon  or {}
+module.game    = module.game    or {}
+module.vehicle = module.vehicle or {}
+module.random  = module.random  or {}
+module.time    = module.time    or {}
 
 -- Locals
 local printableChars = {}
@@ -35,22 +36,42 @@ for c in uppercaseLettersStr:gmatch(".") do
 end
 
 -- String
-self.string.random = function(length, recurse)
+module.string.random = function(length, recurse)
 
   if not recurse then
     math.randomseed(GetGameTimer())
   end
 
 	if length > 0 then
-		return self.string.random(length - 1, true) .. printableChars[math.random(1, #printableChars)]
+		return module.string.random(length - 1, true) .. printableChars[math.random(1, #printableChars)]
 	else
 		return ''
   end
 
 end
 
+module.string.parsetpl = function(tpl, data)
+
+  local str = ''
+
+  for i=1, #tpl, 1 do
+
+    local tplPart = tostring(tpl[i])
+
+    if tplPart:sub(1, 1) == '@' then
+      str = str .. table.get(data, tplPart:sub(2))
+    else
+      str = str .. tplPart
+    end
+
+  end
+
+  return str
+
+end
+
 -- Table
-self.table.dump = function(t, indent)
+module.table.dump = function(t, indent)
 
   if indent == nil then
     indent = 1
@@ -90,7 +111,7 @@ self.table.dump = function(t, indent)
         end
 
         s = doIndent(s)
-        s = s .. self.table.dump(v, indent + 1)
+        s = s .. module.table.dump(v, indent + 1)
 
         count = count + 1
 
@@ -109,7 +130,7 @@ self.table.dump = function(t, indent)
         end
 
         s = doIndent(s)
-        s = s .. '[' .. k .. '] = ' .. self.table.dump(v, indent + 1)
+        s = s .. '[' .. k .. '] = ' .. module.table.dump(v, indent + 1)
 
         count = count + 1
 
@@ -137,7 +158,7 @@ self.table.dump = function(t, indent)
 end
 
 -- Weapon
-self.weapon.get = function(weaponName)
+module.weapon.get = function(weaponName)
 
   weaponName = string.upper(weaponName)
 
@@ -149,7 +170,7 @@ self.weapon.get = function(weaponName)
 
 end
 
-self.weapon.getFromHash = function(weaponHash)
+module.weapon.getFromHash = function(weaponHash)
 
   for k,v in ipairs(Config.Weapons) do
 		if v.hash == weaponHash then
@@ -159,20 +180,20 @@ self.weapon.getFromHash = function(weaponHash)
 
 end
 
-self.weapon.getAll = function()
+module.weapon.getAll = function()
 	return Config.Weapons
 end
 
 if IsDuplicityVersion() then
 
-  self.weapon.getLabel = function(weaponName)
+  module.weapon.getLabel = function(weaponName)
     print('[warning] weapon labels only available client-side, ' .. weaponName .. ' will be returned instead')
     return weaponName
   end
 
 else
 
-  self.weapon.getLabel = function(weaponName)
+  module.weapon.getLabel = function(weaponName)
 
     weaponName = string.upper(weaponName)
 
@@ -186,7 +207,7 @@ else
 
 end
 
-self.weapon.getComponent = function(weaponName, weaponComponent)
+module.weapon.getComponent = function(weaponName, weaponComponent)
 
   weaponName = string.upper(weaponName)
 	local weapons = Config.Weapons
@@ -204,7 +225,7 @@ self.weapon.getComponent = function(weaponName, weaponComponent)
 end
 
 
-self.vehicle.generateRandomPlate = function()
+module.vehicle.generateRandomPlate = function()
 
   -- Force random on each iteration
   math.randomseed(GetGameTimer())
@@ -223,7 +244,7 @@ self.vehicle.generateRandomPlate = function()
 end
 
 -- Random
-self.random.isLucky = function(percentChance, cb, callCbOnUnlucky)
+module.random.isLucky = function(percentChance, cb, callCbOnUnlucky)
 
   local hasCallback     = cb ~= nil
   local callCbOnUnlucky = callCbOnUnlucky ~= nil and callCbOnUnlucky or false
@@ -254,9 +275,9 @@ self.random.isLucky = function(percentChance, cb, callCbOnUnlucky)
 
 end
 
-self.random.isUnlucky = self.random.isLucky
+module.random.isUnlucky = module.random.isLucky
 
-self.random.inRange = function(min, max)
+module.random.inRange = function(min, max)
 
   local min = min ~= nil and min or 0
   local max = max ~= nil and max or 100
@@ -267,3 +288,50 @@ self.random.inRange = function(min, max)
   return math.random(min, max)
 
 end
+
+module.time.fromTimestamp = function(timestamp)
+  
+  local w = math.floor(timestamp / 86400 / 7)
+  local d = math.floor(timestamp / 86400 % 7)
+  local h = math.floor(timestamp / 3600  % 24)
+  local m = math.floor(timestamp / 60    % 60)
+  local s = math.floor(timestamp % 60)
+
+  return w, d, h, m, s
+
+end
+
+module.game.isFreemodeModel = function(nameOrHash)
+  local name = type(nameOrHash) == 'string' and nameOrHash or PED_MODELS_BY_HASH[nameOrHash]
+  return (name == 'mp_m_freemode_01') or (name == 'mp_f_freemode_01')
+end
+
+module.game.isHumanModel = function(nameOrHash)
+
+  local name = type(nameOrHash) == 'string' and nameOrHash or PED_MODELS_BY_HASH[nameOrHash]
+  name       = name or ''
+
+  return name:sub(1, 2) ~= 'a_'
+
+end
+
+module.game.isAnimalModel = function(nameOrHash)
+
+  local name = type(nameOrHash) == 'string' and nameOrHash or PED_MODELS_BY_HASH[nameOrHash]
+  name       = name or ''
+
+  return name:sub(1, 2) == 'a_'
+
+end
+
+module.printWarning = function(str)
+  print(('[^3WARNING^7] %s'):format(str))
+end
+
+module.try = function(f, catch_f)
+  local status, exception = pcall(f)
+  if not status then
+    catch_f(exception)
+  end
+end
+  

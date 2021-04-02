@@ -11,6 +11,14 @@
 --   This copyright should appear in every part of the project code
 
 Locales['en'] = {
+  -- Global
+  ['submit'] = 'Submit',
+  ['back'] = 'Go Back',
+  ['close'] = 'Close',
+  ['exit'] = 'Exit',
+  ['yes'] = 'Yes',
+  ['no'] = 'No',
+
   -- Inventory
   ['inventory'] = 'inventory %s / %s',
   ['use'] = 'use',
@@ -49,6 +57,18 @@ Locales['en'] = {
   ['threw_cannot_pickup'] = 'you cannot pickup that because your inventory is full!',
   ['threw_pickup_prompt'] = 'press ~y~E~s~ to pickup',
 
+  -- Account
+  ['account_moniker'] = "$",
+  ['account_add_money'] = 'add money to a player account',
+  ['account_account_name'] = 'account name',
+  ['account_money_value'] =  'amount',
+  ['account_commandderror_account'] = 'account missing',
+  ['account_commanderror_money'] = 'amount missing',
+  ['account_remove_money'] = 'remove money from a player account',
+  ['account_notify_moneychange'] = 'Transaction of ~g~%s%s~s~ approved for the account \"~y~%s~s~\".',
+  ['account_notify_not_enough_money'] = 'Transaction of ~g~%s%s ~s~declined. Your account \"~y~%s~s~\" does not have enough funds.',
+  ['account_notify_transaction_error'] = 'There was an error retrieving the account \"~y~%s~s~\".',
+
   -- Key mapping
   ['keymap_showinventory'] = 'show Inventory',
 
@@ -66,10 +86,6 @@ Locales['en'] = {
   ['in_vehicle'] = 'you cannot give anything to someone in a vehicle',
 
   -- Commands
-  ['command_car'] = 'spawn a vehicle',
-  ['command_car_car'] = 'vehicle spawn name or hash',
-  ['command_cardel'] = 'delete vehicle in proximity',
-  ['command_cardel_radius'] = 'optional, delete every vehicle within the specified radius',
   ['command_clear'] = 'clear chat',
   ['command_clearall'] = 'clear chat for all players',
   ['command_clearinventory'] = 'clear player inventory',
@@ -109,9 +125,45 @@ Locales['en'] = {
   ['commanderror_invaliditem'] = 'invalid item name',
   ['commanderror_invalidweapon'] = 'invalid weapon',
   ['commanderror_console'] = 'that command cannot be run from console',
+  ['commanderror_self'] = 'You can`t do that to yourself',
   ['commanderror_invalidcommand'] = '^3%s^0 is not a valid command!',
   ['commanderror_invalidplayerid'] = 'there is no player online matching that server id',
   ['commandgeneric_playerid'] = 'player id',
+
+  --- Admin
+  ['admin_command_tp_to_marker'] = 'teleport to marker',
+  ['admin_command_tp_to_player'] = 'teleport to player',
+  ['admin_command_tp_to_me'] = 'teleport player to me',
+  ['admin_command_tp_to_coords'] = 'teleport to coords',
+  ['admin_command_tptp_rev'] = 'bring',
+  ['admin_command_car'] = 'spawn a vehicle',
+  ['admin_command_car_hashname'] = 'vehicle spawn name or hash',
+  ['admin_command_cardel'] = 'delete vehicle in proximity',
+  ['admin_command_cardel_radius'] = 'optional, delete every vehicle within the specified radius',
+  ['admin_command_freeze'] = 'Freeze',
+  ['admin_command_unfreeze'] = 'UnFreeze',
+	['admin_command_revive'] = 'Revive',
+	['admin_command_get_coords'] = 'Print your or player coords in console(F8)',
+	['admin_command_player_list'] = 'Print connected users in console(F8)',
+  ['admin_command_spectate_player'] = 'spectate player',
+  ['admin_command_health'] = 'set health',
+	['admin_command_kill_player'] = 'kill player',
+  ['admin_command_armor'] = 'set armor',
+	['admin_command_set_weapon'] = 'set weapon',
+  ['admin_result_tp'] = 'Teleported',
+	['admin_result_freeze'] = 'You have been freezed by admin.',
+	['admin_result_unfreeze'] = 'You have been unfreezed by admin.',
+	['admin_result_revive'] = 'You have been ressurected by admin.',
+	['admin_result_health'] = 'Your health has been changed.',
+	['admin_result_armor'] = 'Your armor has been changed.',
+	['admin_result_tptm'] = 'Please place your waypoint.',
+  ['admin_result_current_active'] = 'You have an action active.',
+  ['admin_result_spectate'] = 'Press ~INPUT_FRONTEND_CANCEL~ to exit spectate mode.',
+
+  -- Unfinished
+  -- ['command_kick'] = 'Kick',
+  -- ['command_ban'] = 'Ban',
+  -- ['command_unban'] = 'Unban',
 
   -- Locale settings
   ['locale_digit_grouping_symbol'] = ',',
@@ -236,7 +288,15 @@ Locales['en'] = {
   ['tint_platinum'] = 'platinum skin',
 
   -- Identity
+  ['identity_create'] = 'Identity Registration',
   ['identity_register'] = 'Please register your character.',
   ['identity_welcome'] = 'Welcome, ~b~%s %s',
   ['identity_fill_in'] = 'Please fill in all fields before submitting!',
+  ['identity_firstname'] = 'First Name',
+  ['identity_lastname'] = 'Last Name',
+  ['identity_birthdate'] = 'Birth Date',
+  ['identity_sex'] = "Sex",
+  ['identity_male'] = "Male",
+  ['identity_female'] = "Female",
+
 }
