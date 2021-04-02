@@ -4,6 +4,7 @@ import { Form, Modal, Button, Icon, Header } from "semantic-ui-react";
 type ReasonModalProps = {
   action?: string;
   playerId?: string;
+  playerName?: string;
   isOpened: boolean;
   onConfirm: (reason: string) => void;
   onClose: () => void;
@@ -12,6 +13,7 @@ type ReasonModalProps = {
 export const ReasonModal: FunctionComponent<ReasonModalProps> = ({
   action,
   playerId,
+  playerName,
   isOpened,
   onConfirm,
   onClose,
@@ -28,15 +30,16 @@ export const ReasonModal: FunctionComponent<ReasonModalProps> = ({
       closeIcon
       open={isOpened}
       onClose={onClose}
+      style={{backgroundColor: "black"}}
     >
       <Header icon="trash" content={`${action?.toUpperCase()} ${playerId}`} />
       <Modal.Content>
         <p>
-          You're about to {action} Player({playerId}), please enter a reason.
+          You're about to {action} {playerName} (ID: {playerId}). To Continue, Enter The Reason.
         </p>
         <Form>
           <Form.TextArea
-            error={!reason ? "Enter a reason" : null}
+            error={!reason ? "Enter The Reason" : null}
             onChange={(_, { value }) => setReason(String(value))}
             label="Reason"
             placeholder="Player Broke the Rules - Mycroft Studios"

@@ -53,7 +53,7 @@ const CustomTab = styled(Tab)`
     background-color: rgba(60, 60, 60, 0.8) !important;
     border-color: black !important;
   }
-  color: white;
+  color: black;
 
   max-height: 80vh !important;
 `;
@@ -154,25 +154,27 @@ const App = () => {
                         {player.identifier}
                       </Table.Cell>
                       <Table.Cell>
-                        {/* <Button
+                        <Button
                           onClick={() =>
                             setModalMetadata({
                               action: "kick",
                               isOpened: true,
                               playerId: player.source,
+                              playerName: player.name,
                             })
                           }
                           size="mini"
                           color="blue"
                         >
                           Kick
-                        </Button> */}
+                        </Button>
                         <Button
                           onClick={() =>
                             setModalMetadata({
                               action: "ban",
                               isOpened: true,
                               playerId: player.source,
+                              playerName: player.name,
                             })
                           }
                           size="mini"
@@ -182,16 +184,12 @@ const App = () => {
                         </Button>
                         <Button
                           onClick={() =>
-                            setModalMetadata({
-                              action: "tp",
-                              isOpened: true,
-                              playerId: player.source,
-                            })
+                            tpQuery({playerId: player.source})
                           }
                           size="mini"
                           color="blue"
                         >
-                          Teleport To
+                          TP
                         </Button>
                       </Table.Cell>
                     </Table.Row>
@@ -232,14 +230,12 @@ const App = () => {
           } else if (modalMetadata.action === "ban") {
             banQuery({ id: modalMetadata.playerId, reason });
           }
-          else if (modalMetadata.action === "tp") {
-            tpQuery({ id: modalMetadata.playerId, reason });
-          }
 
           setModalMetadata({ isOpened: false });
         }}
         action={modalMetadata.action}
         playerId={modalMetadata.playerId}
+        playerName={modalMetadata.playerName}
       />
     </CustomContainer>
   );
