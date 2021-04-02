@@ -113,6 +113,7 @@ const App = () => {
   const [closeQuery] = useNuiQuery("close");
   const [kickQuery] = useNuiQuery("kick");
   const [banQuery] = useNuiQuery("ban");
+  const [tpQuery] = useNuiQuery("tp");
 
   const panes = useMemo(() => {
     return [
@@ -129,7 +130,7 @@ const App = () => {
               <CustomTable celled fixed singleLine>
                 <Table.Header>
                   <Table.Row>
-                    <Table.HeaderCell>Id</Table.HeaderCell>
+                    <Table.HeaderCell>ID</Table.HeaderCell>
                     <Table.HeaderCell>Nickname</Table.HeaderCell>
                     <Table.HeaderCell>RP Name</Table.HeaderCell>
                     <Table.HeaderCell>Identifier</Table.HeaderCell>
@@ -153,7 +154,7 @@ const App = () => {
                         {player.identifier}
                       </Table.Cell>
                       <Table.Cell>
-                        <Button
+                        {/* <Button
                           onClick={() =>
                             setModalMetadata({
                               action: "kick",
@@ -162,10 +163,10 @@ const App = () => {
                             })
                           }
                           size="mini"
-                          color="orange"
+                          color="blue"
                         >
                           Kick
-                        </Button>
+                        </Button> */}
                         <Button
                           onClick={() =>
                             setModalMetadata({
@@ -178,6 +179,19 @@ const App = () => {
                           color="red"
                         >
                           Ban
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            setModalMetadata({
+                              action: "tp",
+                              isOpened: true,
+                              playerId: player.source,
+                            })
+                          }
+                          size="mini"
+                          color="blue"
+                        >
+                          Teleport To
                         </Button>
                       </Table.Cell>
                     </Table.Row>
@@ -217,6 +231,9 @@ const App = () => {
             kickQuery({ id: modalMetadata.playerId, reason });
           } else if (modalMetadata.action === "ban") {
             banQuery({ id: modalMetadata.playerId, reason });
+          }
+          else if (modalMetadata.action === "tp") {
+            tpQuery({ id: modalMetadata.playerId, reason });
           }
 
           setModalMetadata({ isOpened: false });

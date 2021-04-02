@@ -38,6 +38,9 @@ module.Init = function()
   module.Frame:on('ban', function(data)
     module.BanPlayer(data.id, data.reason)
   end)
+  module.Frame:on('tp', function(data)
+    module.TeleportToPlayer(data.id)
+  end)
 end
 
 module.openAdminMenu = function()

@@ -32,14 +32,14 @@ export const ReasonModal: FunctionComponent<ReasonModalProps> = ({
       <Header icon="trash" content={`${action?.toUpperCase()} ${playerId}`} />
       <Modal.Content>
         <p>
-          You're about to {action} {playerId}, please enter a reason.
+          You're about to {action} Player({playerId}), please enter a reason.
         </p>
         <Form>
           <Form.TextArea
             error={!reason ? "Enter a reason" : null}
             onChange={(_, { value }) => setReason(String(value))}
             label="Reason"
-            placeholder="This person broke the rules - Charli XCX"
+            placeholder="Player Broke the Rules - Mycroft Studios"
           />
         </Form>
       </Modal.Content>

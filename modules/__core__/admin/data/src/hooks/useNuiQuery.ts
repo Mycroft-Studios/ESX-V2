@@ -16,7 +16,6 @@ export const useNuiQuery = (action: string) => {
   const query = useCallback(
     (payload?: unknown) => {
       if (isBrowser) {
-        console.log(`[MOCK FETCH CALL] - ${action}`, payload);
         return;
       }
 
