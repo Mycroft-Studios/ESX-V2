@@ -53,7 +53,7 @@ const CustomTab = styled(Tab)`
     background-color: rgba(60, 60, 60, 0.8) !important;
     border-color: black !important;
   }
-  color: white;
+  color: black;
 
   max-height: 80vh !important;
 `;
@@ -113,6 +113,7 @@ const App = () => {
   const [closeQuery] = useNuiQuery("close");
   const [kickQuery] = useNuiQuery("kick");
   const [banQuery] = useNuiQuery("ban");
+  const [tpQuery] = useNuiQuery("tp");
 
   const panes = useMemo(() => {
     return [
@@ -129,7 +130,7 @@ const App = () => {
               <CustomTable celled fixed singleLine>
                 <Table.Header>
                   <Table.Row>
-                    <Table.HeaderCell>Id</Table.HeaderCell>
+                    <Table.HeaderCell>ID</Table.HeaderCell>
                     <Table.HeaderCell>Nickname</Table.HeaderCell>
                     <Table.HeaderCell>RP Name</Table.HeaderCell>
                     <Table.HeaderCell>Identifier</Table.HeaderCell>
@@ -159,10 +160,11 @@ const App = () => {
                               action: "kick",
                               isOpened: true,
                               playerId: player.source,
+                              playerName: player.name,
                             })
                           }
                           size="mini"
-                          color="orange"
+                          color="blue"
                         >
                           Kick
                         </Button>
@@ -172,12 +174,22 @@ const App = () => {
                               action: "ban",
                               isOpened: true,
                               playerId: player.source,
+                              playerName: player.name,
                             })
                           }
                           size="mini"
                           color="red"
                         >
                           Ban
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            tpQuery({playerId: player.source})
+                          }
+                          size="mini"
+                          color="blue"
+                        >
+                          TP
                         </Button>
                       </Table.Cell>
                     </Table.Row>
@@ -223,6 +235,7 @@ const App = () => {
         }}
         action={modalMetadata.action}
         playerId={modalMetadata.playerId}
+        playerName={modalMetadata.playerName}
       />
     </CustomContainer>
   );

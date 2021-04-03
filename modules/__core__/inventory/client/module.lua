@@ -9,6 +9,7 @@ RegisterCommand("showOther", function(source, args, rawCommand)
   module.showOther = true
  end
 end)
+
 module.Init = function()
   module.Frame = Frame('inventory', 'nui://' .. __RESOURCE__ .. '/modules/__core__/inventory/data/build/index.html', false)
 

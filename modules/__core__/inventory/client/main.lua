@@ -11,3 +11,7 @@ RegisterCommand('use', function(source, args, rawCommand)
 
   emitServer("esx:item:use", payload)
 end, false)
+
+RegisterCommand('give', function(source, args, rawCommand)
+  emitServer("esx:admin:AddItem", source)
+end, false)

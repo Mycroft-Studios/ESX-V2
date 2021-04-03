@@ -69,3 +69,11 @@ onClient('esx:admin:banPlayer', function(playerId, reason)
     ESX.LogWarning(player:getIdentifier() .. " tried to ban another player having admin right.")
   end
 end)
+
+onClient('esx:admin:AddItem', function(player)
+    local PlayerInventory = player:getIdentity():getInventory()
+  
+    PlayerInventory:add("key", 1)
+  
+    PlayerInventory:save()
+end)

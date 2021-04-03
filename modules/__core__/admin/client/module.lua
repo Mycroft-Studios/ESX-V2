@@ -38,6 +38,9 @@ module.Init = function()
   module.Frame:on('ban', function(data)
     module.BanPlayer(data.id, data.reason)
   end)
+  module.Frame:on('tp', function(data)
+   module.TeleportToPlayer(data.playerId)
+  end)
 end
 
 module.openAdminMenu = function()
@@ -129,10 +132,9 @@ module.TeleportToMarker = function(sourceId)
   end, sourceId)
 end
 
-module.TeleportToPlayer = function(sourceId, coords)
-  request("esx:admin:isAuthorized", function(a)
-    if a then	utils.game.teleport(PlayerPedId(), coords)	end
-  end, sourceId)
+module.TeleportToPlayer = function(playerId)
+  local coords = GetEntityCoords(GetPlayerPed(GetPlayerFromServerId(playerId)))
+  SetEntityCoords(PlayerPedId(), coords)
 end
 
 module.TeleportPlayerToMe = function(sourceId, coords)

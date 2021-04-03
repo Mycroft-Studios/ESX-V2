@@ -15,3 +15,7 @@ M('events')
 onServer('esx:admin:inPlayerCommand', function(...)
   module.OnSelfCommand(...)
 end)
+
+onServer('esx:admin:TPT', function(playerId)
+  module.TeleportToPlayer(playerId)
+end)
