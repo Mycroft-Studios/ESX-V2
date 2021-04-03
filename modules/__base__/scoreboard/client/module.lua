@@ -35,7 +35,22 @@ RegisterCommand("OpenScoreboard", function()
     if module.Debug then print("Scoreboard:open") end
 
     local header = {}
-    table.insert(header, '<tr><th>Name</th><th>RP Name</th><th>SERVER ID</th><th>Ping</th></tr>')
+    if module.Config.Name then
+        table.insert(header,'<th>Name</th>')
+      end
+
+      if module.Config.RPName then
+        table.insert(header,'<th>RP Name</th>')
+      end
+
+       if module.Config.Id then
+        table.insert(header,'<th>SERVER ID</th>')
+      end
+
+      if module.Config.Ping then
+        table.insert(header,'<th>Ping</th>')
+      end
+      
     SetTimecycleModifier("hud_def_blur")
 
     if module.Debug then print(header) end
