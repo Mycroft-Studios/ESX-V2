@@ -10,15 +10,7 @@
 --   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
 --   This copyright should appear in every part of the project code
 
-module.Config  = run('data/config.lua', {vector3 = vector3})['Config']
-module.Frame = Frame('scoreboard', 'nui://' .. __RESOURCE__ .. '/modules/__base__/scoreboard/data/html/'.. module.Config.Theme ..'.html', true)
+-- module.Interiors = run('data/interiors.lua', {vector3 = vector3})['Interiors']
+Config = {}
 
-module.Frame:on('load', function() module.Ready = true end)
-
-on('esx:characterLoaded', function()
-    emitServer('esx:scoredboard:addPlayer')
-end)
-
-module.Frame:on('message', function(msg)
-    if msg.action == 'CLOSE:SCOREBOARD' then module.CloseScoreboard() end
-end)
+Config.Theme = "test"
