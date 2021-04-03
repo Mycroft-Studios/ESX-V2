@@ -277,14 +277,12 @@
     <div class="tbl-header">
       <table cellpadding="0.5" cellspacing="0" border="0">
         <thead>
-          <tr></tr>
         </thead>
       </table>
     </div>
     <div class="tbl-content">
       <table cellpadding="1" cellspacing="0" border="0.5" class="gwd-table-734b">
         <tbody class="gwd-tbody-ja0o">
-          <tr></tr>
         </tbody>
       </table>
     </div>
@@ -299,15 +297,15 @@
       if (msg.action == "SHOW:SCOREBOARD") {
         var table = $('.tbl-content');
         var header = $('.tbl-header');
-        header.find('tr').empty();
-        table.find('tr').empty();
-        header.find('tr').append(msg.header);
+        header.find('thead').empty();
+        table.find('tbody').empty();
+        header.find('thead').append(msg.header);
         $('.background').show()
 
       } else if (msg.action == "ADD:PLAYER") {
         var table = $('.tbl-content');
         var header = $('.tbl-header');
-        table.find('tr').append(msg.data)
+        table.find('tbody').append(msg.data)
       } else if (msg.action == "ADD:INFO") {
         $(".playercount").html(msg.data);
          $(".custom-text").html(msg.text);

@@ -14,8 +14,3 @@ Config = {}
 
 Config.Theme = "clean"
 Config.customtext = "FEZZ"
-
-Config.Name = true
-Config.RPName = true
-Config.ID = true
-Config.Ping = true

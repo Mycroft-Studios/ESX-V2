@@ -80,22 +80,7 @@ local players = {}
           print(RPname)
         end
         
-        if module.Config.Name then
-          table.insert(players,'<td>' .. Sanitize(GetPlayerName(playerId)).. '</td>')
-        end
-
-        if module.Config.RPName then
-          table.insert(players,'<td>' .. RPname .. '</td>')
-        end
-
-         if module.Config.Id then
-          table.insert(players,'<td>' .. playerId .. '</td>')
-        end
-
-        if module.Config.Ping then
-          table.insert(players,'<td>' .. ping ..'</td>')
-        end
-   
+        table.insert(players,'<tr><td>' .. Sanitize(GetPlayerName(playerId)).. '</td><td>' .. RPname .. '</td><td>' .. playerId .. '</td><td>' .. ping ..'</td></tr>')
       else 
         return
       end
