@@ -17,5 +17,5 @@ Config.customtext = "FEZZ"
 
 Config.Name = true
 Config.RPName = true
-Config.ID = true
+Config.Id = true
 Config.Ping = true
