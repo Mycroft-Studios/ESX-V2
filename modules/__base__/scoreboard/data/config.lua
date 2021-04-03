@@ -10,7 +10,6 @@
 --   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
 --   This copyright should appear in every part of the project code
 
--- module.Interiors = run('data/interiors.lua', {vector3 = vector3})['Interiors']
 Config = {}
 
-Config.Theme = "test"
+Config.Theme = "clean"
