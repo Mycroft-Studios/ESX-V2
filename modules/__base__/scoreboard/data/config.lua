@@ -13,3 +13,4 @@
 Config = {}
 
 Config.Theme = "clean"
+Config.customtext = "FEZZ"

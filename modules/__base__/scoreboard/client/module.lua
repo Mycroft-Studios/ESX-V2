@@ -11,16 +11,31 @@
 --   This copyright should appear in every part of the project code
 M('events')
 M('ui.hud')
-
+module.Config  = run('data/config.lua', {vector3 = vector3})['Config']
 module.Ready = false
 module.Frame = nil
-module.Debug = false
+module.Debug = true
+
+function Sanitize(str)
+	local replacements = {
+		['&' ] = '&amp;',
+		['<' ] = '&lt;',
+		['>' ] = '&gt;',
+		['\n'] = '<br/>'
+	}
+
+	return str
+		:gsub('[&<>\n]', replacements)
+		:gsub(' +', function(s)
+			return ' '..('&nbsp;'):rep(#s-1)
+		end)
+end
 
 RegisterCommand("OpenScoreboard", function()
     if module.Debug then print("Scoreboard:open") end
 
     local header = {}
-    table.insert(header, '<tr><th>Name</th><th>RP-Name</th><th>ID</th><th>Ping</th></tr>')
+    table.insert(header, '<tr><th>Name</th><th>RP Name</th><th>SERVER ID</th><th>Ping</th></tr>')
     SetTimecycleModifier("hud_def_blur")
 
     if module.Debug then print(header) end
@@ -46,10 +61,9 @@ RegisterCommand("OpenScoreboard", function()
         end
     end)
 
-    request('esx:scoreboard:Getuptime', function(uptime)
-        if module.Debug then print(uptime) end
-
-        module.Frame:postMessage({action = "ADD:UPTIME", data = (uptime)})
+    request('esx:scoreboard:GetInfo', function(info)
+        print("players",info)
+        module.Frame:postMessage({action = "ADD:INFO", data = (info), text = Sanitize(module.Config.customtext)})
     end)
 end, false)
 
@@ -68,4 +82,3 @@ RegisterCommand("CloseScoreboard", function()
 end, false)
 
 RegisterKeyMapping('OpenScoreboard', 'Open Scoreboard', 'keyboard', 'f11')
-RegisterKeyMapping('CloseScoreboard', 'Close Scoreboard', 'keyboard', 'f9')

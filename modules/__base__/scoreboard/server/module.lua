@@ -16,10 +16,10 @@ M('ui.hud')
 
 module.Init = function()
 end
-
+module.Config  = run('data/config.lua', {vector3 = vector3})['Config']
 local uptimeStart, uptimeCurrent, uptimeDays, uptimeHours, uptimeMinutes = 0, 0, 0, 0, 0
 module.Players = {}
-module.Debug = false
+module.Debug = true
 
 Citizen.CreateThread(function()
     local uptimeStart = GetGameTimer() -- Initialize game timer
@@ -95,9 +95,10 @@ local players = {}
 end)
 
 
-onRequest('esx:scoreboard:Getuptime', function(source, cb)
-  uptime = string.format("UPTIME: %02d:%02d:%02d", uptimeDays, uptimeHours, uptimeMinutes)
-  cb(uptime) 
+onRequest('esx:scoreboard:GetInfo', function(source, cb)
+   info = (#module.Players)
+   print("players",info)
+  cb(info) 
 end)
 
 function Sanitize(str)

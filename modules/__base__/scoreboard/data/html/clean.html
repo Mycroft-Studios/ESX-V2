@@ -161,15 +161,7 @@
       background-image: none;
       background-color: transparent;
     }
-    .Players {
-      top: 30px;
-      left: 970px;
-    }
-    .uptime {
-      top: 30px;
-      left: -10px;
-    }
-    .gwd-div-1yjo {
+    .esx-banner {
       position: absolute;
       width: 1280px;
       background-image: none;
@@ -185,13 +177,14 @@
       background-image: none;
       background-color: transparent;
       font-family: "Barlow Condensed";
-      font-weight: 500;
       font-size: 50px;
       left: 13px;
       top: -2px;
       width: 344.333px;
       height: 61.3333px;
       transform-origin: 50% 50%;
+      font-weight: 300;
+      font-style: italic;
     }
     .gwd-span-8y5t {
       position: absolute;
@@ -261,14 +254,18 @@
       font-weight: 200;
       font-style: italic;
     }
-    .gwd-span-hgw3 {
+    .playercount {
       color: rgb(26, 150, 218);
+      left: 220px;
+      top: 2px;
     }
     .gwd-span-mnv3 {
       font-weight: 300;
     }
-    .gwd-span-uzuk {
+    .custom-text {
       font-weight: normal;
+      left: 99px;
+      top: -1px;
     }
   </style>
 </head>
@@ -276,7 +273,7 @@
 <body class="htmlNoPages">
   <!--for demo wrap-->
   <div class="background">
-    <h1 class=""><span class="ESX">ESX</span><span class="v2">2</span> <span class="SCOREBOARD">SCOREBOARD</span></h1>
+    <h1 class=""><span class="ESX">E</span><span class="v2">S</span> <span class="SCOREBOARD">X</span></h1>
     <div class="tbl-header">
       <table cellpadding="0.5" cellspacing="0" border="0">
         <thead>
@@ -289,8 +286,8 @@
         </tbody>
       </table>
     </div>
-    <div class="gwd-div-1yjo"></div><span class="gwd-span-y2ji">ESX <span class="gwd-span-anlv">2</span> | <span class="gwd-span-mnv3">S</span><span class="gwd-span-95bb">COREBOARD</span></span><span class="gwd-span-8y5t">PLAYERS | <span class="gwd-span-hgw3">01 / 128</span></span>
-    <span class="gwd-span-a4ma">| <span class="gwd-span-uzuk">https://discord.gg/S8WswwSb</span> |&nbsp;</span>
+    <div class="esx-banner"></div><span class="gwd-span-y2ji">ESX <span class="gwd-span-anlv">2</span> | <span class="gwd-span-mnv3">SCOREBOARD</span></span><span class="gwd-span-8y5t">PLAYERS | <span class="playercount"></span></span>
+    <span class="gwd-span-a4ma">| <span class="custom-text">DARK MATTER RP</span> |&nbsp;</span>
   </div>
   <!-- follow me template -->
   <script>
@@ -309,9 +306,9 @@
         var table = $('.tbl-content');
         var header = $('.tbl-header');
         table.find('tbody').append(msg.data)
-      } else if (msg.action == "ADD:UPTIME") {
-        $("u").html(msg.uptime)
-        $("p").html(msg.players)
+      } else if (msg.action == "ADD:INFO") {
+        $(".playercount").html(msg.data);
+         $(".custom-text").html(msg.text);
       }
     });
 
