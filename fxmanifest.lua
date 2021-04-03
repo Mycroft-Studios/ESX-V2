@@ -58,7 +58,6 @@ files {
   'modules/__base__/properties/data/locales/fr.lua',
   'modules/__base__/rpchat/data/config.lua',
   'modules/__base__/scoreboard/data/config.lua',
-  'modules/__base__/scoreboard/data/html/clean.html',
   'modules/__base__/scoreboard/data/html/index.html',
   'modules/__base__/scoreboard/data/html/scoreboard.html',
   'modules/__base__/scoreboard/data/html/test.html',
