@@ -36,6 +36,7 @@ RegisterCommand("OpenScoreboard", function()
 
     local header = {}
     table.insert(header, '<tr><th>Name</th><th>RP Name</th><th>SERVER ID</th><th>Ping</th></tr>')
+    ClearTimecycleModifier()
     SetTimecycleModifier("hud_def_blur")
 
     if module.Debug then print(header) end
