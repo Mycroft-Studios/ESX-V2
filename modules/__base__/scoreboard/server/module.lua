@@ -19,7 +19,7 @@ end
 module.Config  = run('data/config.lua', {vector3 = vector3})['Config']
 local uptimeStart, uptimeCurrent, uptimeDays, uptimeHours, uptimeMinutes = 0, 0, 0, 0, 0
 module.Players = {}
-module.Debug = true
+module.Debug = false
 
 Citizen.CreateThread(function()
     local uptimeStart = GetGameTimer() -- Initialize game timer

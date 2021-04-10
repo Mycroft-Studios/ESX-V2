@@ -313,12 +313,9 @@ module.game.createVehicle = function(model, coords, heading, cb)
 
     RequestCollisionAtCoord(coords.x, coords.y, coords.z)
 
-    local vehicle   = CreateVehicle(model, coords.x, coords.y, coords.z, heading, true, false)
-    local networkId = NetworkGetNetworkIdFromEntity(vehicle)
+    local vehicle   = CreateVehicle(model, coords.x, coords.y, coords.z, heading, true, true)
     local timeout   = 0
 
-    SetNetworkIdCanMigrate(networkId, true)
-    SetEntityAsMissionEntity(vehicle, true, false)
     SetVehicleHasBeenOwnedByPlayer(vehicle, true)
     SetVehicleNeedsToBeHotwired(vehicle, false)
     SetVehRadioStation(vehicle, 'OFF')
@@ -342,11 +339,9 @@ module.game.createLocalVehicle = function(model, coords, heading, cb)
 
     RequestCollisionAtCoord(coords.x, coords.y, coords.z)
 
-    local vehicle   = CreateVehicle(model, coords.x, coords.y, coords.z, heading, false, false)
-    local networkId = NetworkGetNetworkIdFromEntity(vehicle)
+    local vehicle   = CreateVehicle(model, coords.x, coords.y, coords.z, heading, true, true)
     local timeout   = 0
 
-    SetNetworkIdCanMigrate(networkId, true)
     SetEntityAsMissionEntity(vehicle, true, false)
     SetVehicleHasBeenOwnedByPlayer(vehicle, true)
     SetVehicleNeedsToBeHotwired(vehicle, false)

@@ -14,7 +14,7 @@ M('ui.hud')
 module.Config  = run('data/config.lua', {vector3 = vector3})['Config']
 module.Ready = false
 module.Frame = nil
-module.Debug = true
+module.Debug = false
 
 function Sanitize(str)
 	local replacements = {

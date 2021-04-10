@@ -30,7 +30,7 @@ function StatusCircle(): any {
   return (
     <div
       className="App"
-      style={{ display: "flex", position: "absolute", right: 14, bottom: 20 }}
+      style={{ display: "flex", position: "absolute", right: 14, top: 40 }}
     >
       {status.map((stat) => (
         <Fade
