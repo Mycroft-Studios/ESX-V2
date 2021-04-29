@@ -12,5 +12,5 @@
 
 Config = {}
 
-Config.Theme = "clean"
-Config.customtext = "BEST OF BRITISH RP"
+Config.Theme = "defualt"
+-- Config.customtext = "BEST OF BRITISH RP"

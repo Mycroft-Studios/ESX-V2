@@ -3,27 +3,11 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Table</title>
-  <meta name="generator" content="Google Web Designer 11.0.0.0323">
-  <meta data-template-name="gwd-ESX V2">
+  <title>ESX V2 Scoreboard</title>
   <link href="https://fonts.googleapis.com/css?family=Bebas+Neue:regular|Barlow+Condensed:100,100italic,200,200italic,300,300italic,regular,italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic" rel="stylesheet" type="text/css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-  <style type="text/css" id="gwd-text-style">
-    p {
-      margin: 0px;
-    }
-    h1 {
-      margin: 0px;
-    }
-    h2 {
-      margin: 0px;
-    }
-    h3 {
-      margin: 0px;
-    }
-  </style>
   <style type="text/css">
     html, body {
       width: 1920px;
@@ -42,22 +26,25 @@
       font-weight: 300;
       text-align: center;
       border-radius: 20px;
+      padding: 1px;
       font-family: "Trebuchet MS";
       left: 0px;
       font-size: 50px;
       background-image: none;
-      background-color: rgb(8, 8, 8);
+      background-color: rgb(15, 15, 15);
       top: 0px;
     }
+    
     table {
       width: 100%;
       table-layout: fixed;
     }
+
     .tbl-header {
       width: 100%;
       height: 40px;
       background-image: none;
-      background-color: transparent;
+      background-color: rgba(5, 5, 5, 0.95);
       left: 0px;
       top: 782px;
     }
@@ -72,23 +59,24 @@
       top: 0px;
     }
     th {
-      padding-top: 5px;
       text-align: center;
-      font-weight: 500;
-      font-size: 25px;
-      text-decoration: underline;
+      font-size: 30px;
+      font-weight: 400;
       color: rgb(255, 255, 255);
       text-transform: uppercase;
-      font-family: "Trebuchet MS";
+      font-family: "Barlow Condensed";
     }
     td {
       text-align: center;
-      padding: 15px;
       vertical-align: middle;
-      font-weight: 300;
-      font-size: 20px;
+      font-size: 28px;
+      background-color: rgba(10, 10, 10, 1);
+      padding: 10px;
       color: rgb(255, 255, 255);
-      border-bottom: 1px solid rgba(255, 255, 255, 0);
+      border-bottom: 2px solid rgba(120, 120, 120, 1);
+      border-top: 2px solid rgba(120, 120, 120, 1);
+      font-family: "Barlow Condensed";
+      font-weight: 200;
     }
     section {
       margin: 50px;
@@ -111,30 +99,14 @@
       left: 50%;
       width: 1280px;
       height: 720px;
-      background-image: none;
-background: linear-gradient(to bottom right, #B807E6, #6801FB);
+      background-color: rgba(15, 15, 15, 0.95);
       transform: translate3d(-665px, -499px, 0px);
-    }
-    .gwd-span-9y5b {
-      font-size: 50px;
-      font-weight: bold;
-      font-family: "Courier New";
     }
     .SCOREBOARD {
       font-family: "Courier New";
       font-size: 50px;
       left: 558px;
       top: 4px;
-    }
-    .gwd-span-g27d {
-      font-size: 50px;
-    }
-    .ESX {
-      font-weight: bold;
-      font-family: "Courier New";
-      color: rgb(250, 250, 250);
-      left: 422px;
-      top: 0px;
     }
     .v2 {
       font-weight: bold;
@@ -157,65 +129,86 @@ background: linear-gradient(to bottom right, #B807E6, #6801FB);
       font-style: italic;
       font-weight: normal;
     }
-    .gwd-table-734b {
+    .table.style {
       background-image: none;
       background-color: transparent;
     }
-    .Players {
-      top: 30px;
-      left: 970px;
-    }
-    .uptime {
-      top: 30px;
-      left: -10px;
-    }
-    .gwd-div-1yjo {
+    .esx-banner {
       position: absolute;
       width: 1280px;
-      height: 61.3333px;
       background-image: none;
       left: 0px;
       top: -4px;
-      background-color: rgb(10, 10, 10);
+      background-color: rgba(5, 5, 5, 0.95);
+      height: 65px;
     }
-    .gwd-span-y2ji {
+    .ESX {
       position: absolute;
       text-align: center;
       color: rgb(255, 255, 255);
       background-image: none;
       background-color: transparent;
       font-family: "Barlow Condensed";
-      top: -4px;
-      font-weight: 500;
       font-size: 50px;
-      left: 1px;
-    }
-    .gwd-span-8y5t {
-      position: absolute;
-      font-size: 50px;
+      left: 13px;
+      top: -2px;
+      width: 344.333px;
+      height: 61.3333px;
+      transform-origin: 50% 50%;
       font-weight: 300;
+      font-style: italic;
+    }
+    .players-text {
+      position: absolute;
       text-align: center;
       color: rgb(255, 255, 255);
       transform-origin: 50% 50% 0px;
       width: 393px;
       height: 57px;
-      left: 924px;
-      top: -4px;
       font-family: "Barlow Condensed";
+      font-size: 45px;
+      font-style: italic;
+      left: 920px;
+      top: 0px;
+      font-weight: 300;
     }
-    .gwd-tbody-ja0o {
+    .tbody {
       background-image: none;
       background-color: transparent;
     }
-    .gwd-span-a4ma {
+    .custom-text-border {
       position: absolute;
       font-family: "Barlow Condensed";
       text-align: center;
       color: rgb(255, 255, 255);
       font-size: 30px;
       font-weight: 500;
-      left: 435px;
-      top: 8px;
+      width: 368px;
+      height: 36px;
+      transform-origin: 50% 50% 0px;
+      left: 456px;
+      top: 10px;
+    }
+    .V2 {
+      color: rgb(26, 150, 218);
+    }
+    .playercount {
+      color: rgb(26, 150, 218);
+      left: 530px;
+      top: 2px;
+    }
+    .totalcount {
+      color: rgb(26, 150, 218);
+      left: 520px;
+      top: 2px;
+    }
+    .scoreboard-text {
+      font-weight: 300;
+    }
+    .custom-text {
+      font-weight: normal;
+      left: 99px;
+      top: -1px;
     }
   </style>
 </head>
@@ -223,22 +216,22 @@ background: linear-gradient(to bottom right, #B807E6, #6801FB);
 <body class="htmlNoPages">
   <!--for demo wrap-->
   <div class="background">
-    <h1 class="" data-gwd-tl-hidden=""><span class="ESX">ESX</span><span class="v2">2</span> <span class="SCOREBOARD">SCOREBOARD</span></h1>
-    <u class="stats uptime" data-gwd-tl-hidden="">UPTIME:</u>
-    <p class="stats Players" data-gwd-tl-hidden="">Players:</p>
+    <h1 class=""></h1>
     <div class="tbl-header">
-      <table cellpadding="0" cellspacing="0" border="0">
+      <table cellpadding="1" cellspacing="0" >
         <thead>
         </thead>
       </table>
     </div>
     <div class="tbl-content">
-      <table cellpadding="0" cellspacing="0.5" border="0" class="gwd-table-734b">
-        <tbody class="gwd-tbody-ja0o">
+      <table cellpadding="1" cellspacing="0" class="table-style">
+        <tbody class="tbody">
         </tbody>
       </table>
     </div>
-    <div class="gwd-div-1yjo"></div><span class="gwd-span-y2ji">DARK MATTER RP</span><span class="gwd-span-8y5t">Players: 10/ 128</span><span class="gwd-span-a4ma">| https://discord.gg/S8WswwSb |&nbsp;</span></div>
+    <div class="esx-banner"></div><span class="ESX">ESX<span class="V2">2</span> | <span class="scoreboard-text">SCOREBOARD</span></span><span class="players-text">PLAYERS | <span class="playercount"></span><span class="totalcount"> /32</span></span>
+    <span class="custom-text-border">| <span class="custom-text">Hello!</span> |&nbsp;</span>
+  </div>
   <!-- follow me template -->
   <script>
     $('.background').hide()
@@ -256,9 +249,10 @@ background: linear-gradient(to bottom right, #B807E6, #6801FB);
         var table = $('.tbl-content');
         var header = $('.tbl-header');
         table.find('tbody').append(msg.data)
-      } else if (msg.action == "ADD:UPTIME") {
-        $("u").html(msg.uptime)
-        $("p").html(msg.players)
+      } else if (msg.action == "ADD:INFO") {
+        $(".playercount").html(msg.data);
+         $(".custom-text").html(msg.text);
+         $(".totalcount").html(msg.maxPlayers);
       }
     });
 

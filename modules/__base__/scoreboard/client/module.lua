@@ -56,15 +56,14 @@ RegisterCommand("OpenScoreboard", function()
             end
 
             module.Frame:postMessage({action = "ADD:PLAYER", data = (players)})
-
         else
             return
         end
-    end)
 
-    request('esx:scoreboard:GetInfo', function(info)
+    end)
+    request('esx:scoreboard:GetInfo', function(players, name, id, maxPlayers)
         print("players",info)
-        module.Frame:postMessage({action = "ADD:INFO", data = (info), text = Sanitize(module.Config.customtext)})
+            module.Frame:postMessage({action = "ADD:INFO", data = (players), text = (name.. " - ".. id), maxPlayers = (maxPlayers)})
     end)
 end, false)
 

@@ -96,10 +96,25 @@ end)
 
 
 onRequest('esx:scoreboard:GetInfo', function(source, cb)
-   info = (#module.Players)
-   print("players",info)
-  cb(info) 
+  local info = {}
+   info.players = (#module.Players)
+   local player = Player.fromId(source)
+    
+   if player ~= nil then
+     local playerData = player:getIdentity()
+     local firstname  = playerData:getFirstName()
+     local lastname   = playerData:getLastName()
+
+     RPname = Sanitize((""..firstname.." "..lastname))
+
+   info.name = RPname
+   end
+
+   info.id = source
+   info.MaxPlayers = (" / "..GetConvarInt("sv_maxclients", 32))
+  cb(info.players, info.name, info.id, info.MaxPlayers) 
 end)
+
 
 function Sanitize(str)
 	local replacements = {
