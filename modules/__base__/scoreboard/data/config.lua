@@ -12,5 +12,4 @@
 
 Config = {}
 
-Config.Theme = "defualt"
--- Config.customtext = "BEST OF BRITISH RP"
+Config.Theme = "default"
