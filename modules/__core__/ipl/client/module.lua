@@ -368,7 +368,6 @@ module.RequestAllIpls() = function()
 	RequestIpl('gr_case10_bunkerclosed') -- -3058.714, 3329.19, 12.5844
 	RequestIpl('gr_case11_bunkerclosed') -- -3180.466, 1374.192, 19.9597
 
-	-- Smugglers run / Doomsday interiors
 
 	RequestIpl('xm_siloentranceclosed_x17')
 	RequestIpl('sm_smugdlc_interior_placement')
@@ -431,41 +430,10 @@ module.RequestAllIpls() = function()
 	RequestIpl('xm_hatches_terrain_lod')
 	RequestIpl('xm_mpchristmasadditions')
 
-	-- Bunkers: Interior: 892.638, -3245.866, -98.265
-	--[[
+
 	RequestIpl('gr_entrance_placement')
 	RequestIpl('gr_grdlc_interior_placement')
 	RequestIpl('gr_grdlc_interior_placement_interior_0_grdlc_int_01_milo_')
 	RequestIpl('gr_grdlc_interior_placement_interior_1_grdlc_int_02_milo_')
-	--]]
 
-	-- North Yankton: 3217.697, -4834.826, 111.815
-	--[[
-	RequestIpl('prologue01')
-	RequestIpl('prologue01c')
-	RequestIpl('prologue01d')
-	RequestIpl('prologue01e')
-	RequestIpl('prologue01f')
-	RequestIpl('prologue01g')
-	RequestIpl('prologue01h')
-	RequestIpl('prologue01i')
-	RequestIpl('prologue01j')
-	RequestIpl('prologue01k')
-	RequestIpl('prologue01z')
-	RequestIpl('prologue02')
-	RequestIpl('prologue03')
-	RequestIpl('prologue03b')
-	RequestIpl('prologue04')
-	RequestIpl('prologue04b')
-	RequestIpl('prologue05')
-	RequestIpl('prologue05b')
-	RequestIpl('prologue06')
-	RequestIpl('prologue06b')
-	RequestIpl('prologue06_int')
-	RequestIpl('prologuerd')
-	RequestIpl('prologuerdb')
-	RequestIpl('prologue_DistantLights')
-	RequestIpl('prologue_LODLights')
-	RequestIpl('prologue_m2_door')
-	--]]
 end
